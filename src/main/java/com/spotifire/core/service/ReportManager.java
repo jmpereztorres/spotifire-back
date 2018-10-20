@@ -1,7 +1,6 @@
 package com.spotifire.core.service;
 
 import java.util.Calendar;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,11 +26,6 @@ public class ReportManager implements IReportService {
 		}
 
 		return this.saveReport(report);
-	}
-
-	@Override
-	public List<Report> listReports(Report report) {
-		return this.transactionalRepository.findByExample(report);
 	}
 
 	@Override

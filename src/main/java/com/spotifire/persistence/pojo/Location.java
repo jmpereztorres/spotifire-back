@@ -32,6 +32,12 @@ public class Location implements IPojo {
 		super();
 	}
 
+	public Location(Double latitude, Double longitude) {
+		super();
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
 	@Override
 	public Long getId() {
 		return id;

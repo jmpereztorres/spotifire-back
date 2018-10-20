@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -21,7 +22,16 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.web.client.RestTemplate;
 
 import com.spotifire.config.EmptyConfig;
+import com.spotifire.persistence.pojo.Location;
+import com.spotifire.persistence.pojo.Report;
 import com.spotifire.web.rest.dto.WeatherDTO;
+
+import twitter4j.Query;
+import twitter4j.QueryResult;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 
 /**
  *
@@ -116,56 +126,67 @@ public class MiscCodeTest {
 			riskFactor += 0.1;
 		}
 
+		int riskFactorInt = (int) riskFactor * 100;
+		
+		System.out.printf("riskFactor: %d \n", riskFactorInt);
+
 		System.out.println("Test End");
 	}
 
 	@Test
-	public void compendiumScoring() {
+	public void fetchTwitter() {
+		Twitter twitter = new TwitterFactory().getInstance();
+		// Twitter Consumer key & Consumer Secret
+		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
+		// Twitter Access token & Access token Secret
+		twitter.setOAuthAccessToken(new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi",
+				"U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
 
-		System.out.println("Testing compendiumScoring...");
-		LOGGER.debug("EEEEES");
-		System.out.println("Test Init");
+		Query query = new Query();
+		query.setQuery("#spotifire");
+		query.setCount(100);
+		List<Status> statuses = null;
+		try {
+			QueryResult queryResult = twitter.search(query);
+			statuses = queryResult.getTweets();
+			System.out.println(statuses.size());
+			statuses.stream().forEach(tweet -> {
+				Report report = new Report();
+				report.setTwitterId(tweet.getId());
 
-		float latitude = 0;
-		float longitude = 0;
-		int totalConfidence = 0;
-		int confidenceImage = 0;
-		int confidenceNASAStellite = 0;
-		int confidenceTwitterInfo = 0;
+//			List<Report> persistedReports = this.repo.findByExample(report);
+//			if(SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
+//
+//			}
 
-		confidenceImage = scoringImage("C:/Users/Carlos/Desktop/imagenes/no llamas/no_llamas_1.jpg");
-		System.out.printf("Confidence of the image being of a fire: %d \n", confidenceImage);
+				report.setCreationDate(tweet.getCreatedAt());
+				if (tweet.getGeoLocation() != null) {
+					report.setLocation(
+							new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
+				}
 
-		confidenceNASAStellite = sconringSatellite(latitude, longitude);
-		System.out.printf("Confidence of the info provided by NASA satellites: %d \n", confidenceNASAStellite);
-
-		confidenceTwitterInfo = scoringTwitterInfo(latitude, longitude);
-		System.out.printf("Confidence of the info provided by Twitter: %d \n", confidenceTwitterInfo);
-
-		totalConfidence = (int) ((int) (confidenceImage * 0.3)) + ((int) (confidenceNASAStellite * 0.4))
-				+ ((int) (confidenceTwitterInfo * 0.4));
-		System.out.printf("Total confidence: %d \n", totalConfidence);
+//			report.setSource(source);
+				report.setDescription(tweet.getText());
+//			report.setHasImage(hasImage);
+				System.out.println(tweet.getText() + "\n");
+			});
+		} catch (Exception e) {
+		}
+		System.out.println("OK");
 	}
 
-	private int scoringTwitterInfo(float latitude, float longitude) {
-		int confidence = 0;
+	@Test
+	public void scoringImage() {
 
-		return confidence;
-	}
+		System.out.println("Testing scoringImage...");
 
-	private int sconringSatellite(float latitude, float longitude) {
-		int confidence = 0;
-
-		return confidence;
-	}
-
-	private int scoringImage(String inputPath) {
 		BufferedImage imageInput = null;
 		File input_file = null;
 
 		try {
-			input_file = new File(inputPath);
+			input_file = new File("C:/Users/Carlos/Desktop/imagenes/no llamas/no_llamas_1.jpg");
 			imageInput = ImageIO.read(input_file);
+			System.out.println("Reading complete.");
 		} catch (IOException e) {
 			System.out.println("Error: " + e);
 		}
@@ -195,7 +216,8 @@ public class MiscCodeTest {
 
 		int confidence = analyzeFire(histogramReturn, width, height);
 
-		return confidence;
+		System.out.printf("Confidence of the image being of a fire: %d \n", confidence);
+		System.out.println("Test OK");
 	}
 
 	private int analyzeFire(int histogram[][], int width, int height) {
