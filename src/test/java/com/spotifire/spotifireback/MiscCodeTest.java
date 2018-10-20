@@ -80,9 +80,9 @@ public class MiscCodeTest {
 			report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
 			}
 
-			report.setSource(source);
+//			report.setSource(source);
 			report.setDescription(tweet.getText());
-			report.setHasImage(hasImage);
+//			report.setHasImage(hasImage);
 			System.out.println(tweet.getText() + "\n"))};
 
 
