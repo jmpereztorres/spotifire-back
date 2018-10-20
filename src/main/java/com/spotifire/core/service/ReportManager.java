@@ -1,7 +1,5 @@
 package com.spotifire.core.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +19,6 @@ public class ReportManager implements IReportService {
 			report.setImageScore(ImageUtils.scoringImage(report.getImage()));
 		}
 		return this.transactionalRepository.save(report);
-	}
-
-	@Override
-	public List<Report> listReports(Report report) {
-		return this.transactionalRepository.findByExample(report);
 	}
 
 }
