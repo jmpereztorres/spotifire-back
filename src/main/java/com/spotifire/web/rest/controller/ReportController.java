@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 @RestController
 @RequestMapping(value = "/api/reports", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+@CrossOrigin
 public class ReportController {
 
 	private static final Logger LOGGER = LogManager.getLogger(ReportController.class);
@@ -40,6 +42,8 @@ public class ReportController {
 
 	@PostMapping(value = "/upload")
 	public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+
+		System.out.println(file);
 
 		LOGGER.debug(file);
 
