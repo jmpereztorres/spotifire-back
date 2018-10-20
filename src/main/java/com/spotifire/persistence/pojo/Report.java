@@ -14,6 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.spotifire.persistence.constants.ReportType;
 import com.spotifire.persistence.constants.SourceType;
 
 @Entity
@@ -48,7 +49,7 @@ public class Report implements IPojo {
 
 	private String description;
 
-	private String type;
+	private ReportType type;
 
 	private Long twitterId;
 
@@ -77,11 +78,11 @@ public class Report implements IPojo {
 		this.source = source;
 	}
 
-	public String getType() {
+	public ReportType getType() {
 		return this.type;
 	}
 
-	public void setType(String type) {
+	public void setType(ReportType type) {
 		this.type = type;
 	}
 
