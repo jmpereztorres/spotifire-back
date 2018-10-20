@@ -16,4 +16,9 @@ public class SpotifireConstants {
 	public static final String REST_ACCEPT_APPLICATION_XML_UTF_8 = "application/xml;charset=UTF-8";
 	public static final String REST_ACCEPT_APPLICATION_MULTIPART_MIXED = "multipart/mixed";
 	public static final String REST_ACCEPT_APPLICATION_MULTIPART_FORM_DATA = "multipart/form-data";
+
+	public static final String BOOLEAN_TRUE = "true";
+
+	public static final String OPERATOR_COMMA = ",";
+	public static final String REGEX_DOT = "\\.";
 }
