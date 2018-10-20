@@ -4,9 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.web.client.RestTemplate;
 
 import com.spotifire.config.EmptyConfig;
 
@@ -24,11 +26,14 @@ public class MiscCodeTest {
 
 	private static final Logger LOGGER = LogManager.getLogger(MiscCodeTest.class);
 
+	private RestTemplate restTemplate;
+
 	@Test
 	public void checkConfiguration() {
 
 		System.out.println("Testing checkConfiguration...");
 		LOGGER.debug("EEEEES");
+		restTemplate.getErrorHandler();
 		System.out.println("Test OK");
 	}
 
