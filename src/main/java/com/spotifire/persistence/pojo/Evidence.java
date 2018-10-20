@@ -13,6 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.spotifire.persistence.constants.ReportType;
+
 @Entity
 @Table(name = "EVIDENCE")
 public class Evidence implements IPojo {
@@ -32,7 +34,7 @@ public class Evidence implements IPojo {
 
 	private Integer impact;
 
-	private String type;
+	private ReportType type;
 
 	@OneToMany(mappedBy = "evidence")
 	private List<Report> reports;
@@ -54,11 +56,11 @@ public class Evidence implements IPojo {
 		this.id = id;
 	}
 
-	public String getType() {
+	public ReportType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(ReportType type) {
 		this.type = type;
 	}
 
