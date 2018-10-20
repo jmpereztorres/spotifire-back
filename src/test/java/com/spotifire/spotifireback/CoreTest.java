@@ -11,7 +11,7 @@ import com.spotifire.core.application.SpotifireBackApplication;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpotifireBackApplication.class)
 @SpringBootTest
-public class SpotifireBackApplicationTests {
+public class CoreTest {
 
 	@Test
 	public void contextLoads() {
