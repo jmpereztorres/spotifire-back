@@ -1,4 +1,5 @@
 /target/
+/pictures/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
