@@ -1,6 +1,7 @@
 
 package com.spotifire.persistence.pojo;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -11,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "REPORT")
@@ -33,7 +35,16 @@ public class Report implements IPojo {
 
 	private Date creationDate;
 
+	private Boolean hasImage;
+
+	@Transient
+	private byte[] image;
+
+	private Integer imageScore;
+
 	private String source;
+
+	private String description;
 
 	private String type;
 
@@ -94,6 +105,38 @@ public class Report implements IPojo {
 		this.evidence = evidence;
 	}
 
+	public Boolean getHasImage() {
+		return hasImage;
+	}
+
+	public void setHasImage(Boolean hasImage) {
+		this.hasImage = hasImage;
+	}
+
+	public byte[] getImage() {
+		return image;
+	}
+
+	public void setImage(byte[] image) {
+		this.image = image;
+	}
+
+	public Integer getImageScore() {
+		return imageScore;
+	}
+
+	public void setImageScore(Integer imageScore) {
+		this.imageScore = imageScore;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -136,8 +179,9 @@ public class Report implements IPojo {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Report [id=").append(id).append(", location=").append(location).append(", author=").append(author)
-				.append(", evidence=").append(evidence).append(", creationDate=").append(creationDate).append(", source=").append(source)
-				.append(", type=").append(type).append("]");
+				.append(", evidence=").append(evidence).append(", creationDate=").append(creationDate).append(", hasImage=")
+				.append(hasImage).append(", image=").append(Arrays.toString(image)).append(", imageScore=").append(imageScore)
+				.append(", source=").append(source).append(", description=").append(description).append(", type=").append(type).append("]");
 		return builder.toString();
 	}
 

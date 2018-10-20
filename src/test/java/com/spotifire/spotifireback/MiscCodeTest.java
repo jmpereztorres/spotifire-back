@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -17,8 +18,7 @@ import com.spotifire.config.EmptyConfig;
 
 /**
  *
- * Para probar código suelto, sin referencias al contexto de Spring y sus
- * service, manager y dao
+ * Para probar código suelto, sin referencias al contexto de Spring y sus service, manager y dao
  *
  * @author aars
  *
@@ -42,8 +42,6 @@ public class MiscCodeTest {
 	public void scoringImage() {
 
 		System.out.println("Testing scoringImage...");
-		LOGGER.debug("EEEEES");
-		System.out.println("Test Init");
 
 		BufferedImage imageInput = null;
 		File input_file = null;
