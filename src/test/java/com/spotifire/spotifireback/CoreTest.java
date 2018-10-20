@@ -10,7 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
-import com.spotifire.core.application.SpotifireBackApplication;
+import com.spotifire.SpotifireBackApplication;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.repository.ITransactionalRepository;
 
