@@ -55,7 +55,6 @@ public final class ImageUtils {
 		}
 
 		return score;
-
 	}
 
 	private static int analyzeFire(int histogram[][], int width, int height) {

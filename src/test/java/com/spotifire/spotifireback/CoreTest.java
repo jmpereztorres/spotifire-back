@@ -3,6 +3,8 @@ package com.spotifire.spotifireback;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +18,10 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
@@ -54,12 +59,18 @@ public class CoreTest {
 
 	@Autowired
 	private IReportService reportService;
+	
+	@Autowired
+	@Qualifier("nasaRestTemplate")
+	private RestTemplate nasaRestTemplate;
 
 	@Test
 	public void contextLoads() {
 		System.out.println("OK");
 	}
 
+
+	
 	@Test
 	public void fetchTwitter() {
 		Twitter twitter = new TwitterFactory().getInstance();
@@ -86,7 +97,7 @@ public class CoreTest {
 
 					report.setCreationDate(tweet.getCreatedAt());
 					report.setSource(SourceType.TWITTER.toString());
-					report.setType(ReportType.FIRE.toString());
+					report.setType(ReportType.FIRE);
 					report.setDescription(tweet.getText());
 
 					if (tweet.getGeoLocation() != null) {

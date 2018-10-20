@@ -14,6 +14,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.spotifire.persistence.constants.ReportType;
+
 @Entity
 @Table(name = "REPORT")
 public class Report implements IPojo {
@@ -46,9 +48,11 @@ public class Report implements IPojo {
 
 	private String description;
 
-	private String type;
+	private ReportType type;
 
 	private Long twitterId;
+	
+	private int score;
 
 	/**
 	 * Default constructor
@@ -75,12 +79,12 @@ public class Report implements IPojo {
 		this.source = source;
 	}
 
-	public String getType() {
+	public ReportType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setType(ReportType fire) {
+		this.type = fire;
 	}
 
 	public Author getAuthor() {
@@ -147,6 +151,14 @@ public class Report implements IPojo {
 		this.twitterId = twitterId;
 	}
 
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
