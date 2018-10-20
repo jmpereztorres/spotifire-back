@@ -20,22 +20,23 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
 import com.spotifire.SpotifireBackApplication;
 import com.spotifire.core.service.IReportService;
-import com.spotifire.core.utils.SpotifireUtils;
 import com.spotifire.persistence.constants.ReportType;
 import com.spotifire.persistence.constants.SourceType;
 import com.spotifire.persistence.constants.SpotifireConstants;
+import com.spotifire.persistence.pojo.Author;
 import com.spotifire.persistence.pojo.Evidence;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
 import com.spotifire.persistence.repository.ITransactionalRepository;
+import com.spotifire.web.rest.dto.FireDTO;
+import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -72,6 +73,7 @@ public class CoreTest {
 
 	
 	@Test
+	@Rollback(false)
 	public void fetchTwitter() {
 		Twitter twitter = new TwitterFactory().getInstance();
 		// Twitter Consumer key & Consumer Secret
@@ -93,17 +95,28 @@ public class CoreTest {
 				report.setTwitterId(tweet.getId());
 
 				List<Report> persistedReports = this.repo.findByExample(report);
-				if (SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
+				if (persistedReports == null || persistedReports.isEmpty()) {
 
+					// base data
 					report.setCreationDate(tweet.getCreatedAt());
 					report.setSource(SourceType.TWITTER);
 					report.setType(ReportType.FIRE);
 					report.setDescription(tweet.getText());
 
+					// location
 					if (tweet.getGeoLocation() != null) {
 						report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
 					}
 
+					// author
+					Author authorExample = new Author();
+					authorExample.setAlias(tweet.getUser().getName());
+					authorExample.setSource(SourceType.TWITTER);
+
+					List<Author> persistedAuthors = this.repo.findByExample(authorExample);
+					report.setAuthor(persistedAuthors != null && !persistedAuthors.isEmpty() ? persistedAuthors.get(0) : authorExample);
+
+					// images
 					if (tweet.getMediaEntities() != null && tweet.getMediaEntities().length > 0
 							&& tweet.getMediaEntities()[0].getType().equals("photo")) {
 
@@ -133,6 +146,7 @@ public class CoreTest {
 
 	@Test
 	@Transactional
+	@Rollback(false)
 	public void fillDatabase() {
 		double range = 0.000030d;
 		double latitudeBase = 39.4532f;
@@ -152,7 +166,11 @@ public class CoreTest {
 
 	@Test
 	public void asdads() {
-		List<Evidence> list = this.repo.findByExample(new Evidence());
+
+		ReportRequestDTO reportRequest = new ReportRequestDTO();
+
+		FireDTO fireDTO = this.reportService.findFiresByLocation(reportRequest);
+
 		System.out.println("Test OK");
 	}
 
