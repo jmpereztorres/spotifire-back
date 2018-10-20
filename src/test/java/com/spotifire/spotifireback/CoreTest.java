@@ -3,6 +3,8 @@ package com.spotifire.spotifireback;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
@@ -57,12 +60,18 @@ public class CoreTest {
 
 	@Autowired
 	private IReportService reportService;
+	
+	@Autowired
+	@Qualifier("nasaRestTemplate")
+	private RestTemplate nasaRestTemplate;
 
 	@Test
 	public void contextLoads() {
 		System.out.println("OK");
 	}
 
+
+	
 	@Test
 	@Rollback(false)
 	public void fetchTwitter() {

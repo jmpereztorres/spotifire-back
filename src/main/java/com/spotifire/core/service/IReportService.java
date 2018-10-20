@@ -12,7 +12,7 @@ public interface IReportService {
 
 	Report saveReport(Report report);
 
-	void parseReportAndSave(ReportRequestDTO reportRequest, byte[] image) throws IOException;
+	void parseReportAndSave(ReportRequestDTO reportRequest) throws IOException;
 
 	FireDTO findFiresByLocation(ReportRequestDTO reportRequestDTO);
 }

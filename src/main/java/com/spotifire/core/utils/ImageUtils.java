@@ -56,7 +56,6 @@ public final class ImageUtils {
 
 		System.out.println("Image score is: " + score);
 		return score;
-
 	}
 
 	private static int analyzeFire(int histogram[][], int width, int height) {
