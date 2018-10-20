@@ -54,6 +54,7 @@ public final class ImageUtils {
 			LOGGER.error(e.getMessage(), e);
 		}
 
+		System.out.println("Image score is: " + score);
 		return score;
 
 	}

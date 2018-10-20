@@ -43,7 +43,7 @@ public class ReportController {
 	@PostMapping(value = "/upload")
 	public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
 
-		System.out.println(file);
+		System.out.println("File recieved");
 
 		LOGGER.debug(file);
 

@@ -1,9 +1,12 @@
 package com.spotifire.core.service;
 
+import java.io.IOException;
 import java.util.Calendar;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spotifire.core.utils.ImageUtils;
 import com.spotifire.persistence.constants.SourceType;
@@ -34,7 +37,7 @@ public class ReportManager implements IReportService {
 	}
 
 	@Override
-	public void parseReportAndSave(ReportRequestDTO reportRequest) {
+	public void parseReportAndSave(ReportRequestDTO reportRequest, MultipartFile file) throws IOException {
 
 		Location location = new Location();
 		location.setLatitude(reportRequest.getLatitude());
@@ -43,12 +46,25 @@ public class ReportManager implements IReportService {
 		Author author = new Author();
 		author.setAlias(reportRequest.getDescription());
 		author.setSource(SourceType.SPOTIFIRE);
+		author.setCreationDate(Calendar.getInstance().getTime());
 
 		Report report = new Report();
 		report.setLocation(location);
 		report.setAuthor(author);
 		report.setCreationDate(Calendar.getInstance().getTime());
 		report.setDescription(reportRequest.getDescription());
+		report.setSource(SourceType.SPOTIFIRE);
+
+		byte[] bytes;
+
+		try {
+			bytes = IOUtils.toByteArray(file.getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw e;
+		}
+
+		report.setImage(bytes);
 
 		this.processReport(report);
 
