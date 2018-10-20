@@ -96,7 +96,7 @@ public class CoreTest {
 				if (SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
 
 					report.setCreationDate(tweet.getCreatedAt());
-					report.setSource(SourceType.TWITTER.toString());
+					report.setSource(SourceType.TWITTER);
 					report.setType(ReportType.FIRE);
 					report.setDescription(tweet.getText());
 

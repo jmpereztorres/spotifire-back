@@ -1,16 +1,24 @@
 package com.spotifire.core.service;
 
+import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.spotifire.core.utils.ImageUtils;
+import com.spotifire.core.utils.SpotifireUtils;
 import com.spotifire.persistence.constants.SourceType;
 import com.spotifire.persistence.pojo.Author;
+import com.spotifire.persistence.pojo.Evidence;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
 import com.spotifire.persistence.repository.ITransactionalRepository;
+import com.spotifire.web.rest.dto.FireDTO;
 import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 @Service
@@ -34,7 +42,7 @@ public class ReportManager implements IReportService {
 	}
 
 	@Override
-	public void parseReportAndSave(ReportRequestDTO reportRequest) {
+	public void parseReportAndSave(ReportRequestDTO reportRequest, byte[] image) throws IOException {
 
 		Location location = new Location();
 		location.setLatitude(reportRequest.getLatitude());
@@ -43,15 +51,34 @@ public class ReportManager implements IReportService {
 		Author author = new Author();
 		author.setAlias(reportRequest.getDescription());
 		author.setSource(SourceType.SPOTIFIRE);
+		author.setCreationDate(Calendar.getInstance().getTime());
 
 		Report report = new Report();
 		report.setLocation(location);
 		report.setAuthor(author);
 		report.setCreationDate(Calendar.getInstance().getTime());
 		report.setDescription(reportRequest.getDescription());
+		report.setSource(SourceType.SPOTIFIRE);
+
+		report.setImage(image);
 
 		this.processReport(report);
 
+	}
+
+	@Override
+	public FireDTO findFiresByLocation(ReportRequestDTO reportRequestDTO) {
+		FireDTO fireDTO = new FireDTO();
+		List<Evidence> evidenceList = this.transactionalRepository.findByExample(new Evidence());
+
+		Supplier<Stream<Evidence>> supplier = () -> evidenceList.stream()
+				.filter(report -> SpotifireUtils.distance(report.getLocation().getLatitude(), reportRequestDTO.getLatitude(),
+						report.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 50000);
+
+		fireDTO.setEvidences(supplier.get().filter(report -> report.getConfidence() >= 70).collect(Collectors.toList()));
+		fireDTO.setAlerts(supplier.get().filter(report -> report.getConfidence() < 70).collect(Collectors.toList()));
+
+		return fireDTO;
 	}
 
 }

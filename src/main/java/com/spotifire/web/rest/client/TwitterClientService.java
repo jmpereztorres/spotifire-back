@@ -66,8 +66,8 @@ public class TwitterClientService implements ITwitterClientService {
 				if (SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
 
 					report.setCreationDate(tweet.getCreatedAt());
-					report.setSource(SourceType.TWITTER.toString());
-					report.setType(ReportType.FIRE.toString());
+					report.setSource(SourceType.TWITTER);
+					report.setType(ReportType.FIRE);
 					report.setDescription(tweet.getText());
 
 					if (tweet.getGeoLocation() != null) {
