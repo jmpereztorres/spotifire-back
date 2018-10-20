@@ -3,17 +3,25 @@ package com.spotifire.spotifireback;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.web.client.RestTemplate;
 
 import com.spotifire.config.EmptyConfig;
+import com.spotifire.web.rest.dto.WeatherDTO;
 
 /**
  *
@@ -38,20 +46,78 @@ public class MiscCodeTest {
 		System.out.println("Test Init");
 	}
 
+	/**
+	 * @throws URISyntaxException
+	 */
 	@Test
-	public void scoringImage() {
+	public void testAPIWeather() throws URISyntaxException {
+		// https://api.darksky.net/forecast/f0882429cb4afe2fb72984e427e6789f/37.035229,-6.435476,1499860800?units=si&exclude=flags?exclude=alerts?exclude=minutely
+		System.out.println("Testing testAPIWeather...");
+		System.out.println("Test Init");
+		float latitude = 37.035229f;
+		float longitude = -6.435476f;
+		long timeStamp = (new Date().getTime()) / 1000;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("https://api.darksky.net/forecast/f0882429cb4afe2fb72984e427e6789f/").append(latitude).append(",")
+				.append(longitude).append(",").append(timeStamp)
+				.append("?units=si&exclude=flags?exclude=alerts?exclude=minutely?exclude=hourly?exclude=daily");
+		URI uriPetition = new URI(sb.toString());
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<WeatherDTO> response = restTemplate.exchange(uriPetition, HttpMethod.GET, null, WeatherDTO.class);
+		
+		System.out.println(response.getStatusCode() + ":" + response.getBody());
 
-		System.out.println("Testing scoringImage...");
+		System.out.println("Test End");
+	}
+
+	@Test
+	public void compendiumScoring() {
+
+		System.out.println("Testing compendiumScoring...");
 		LOGGER.debug("EEEEES");
 		System.out.println("Test Init");
 
+		float latitude = 0;
+		float longitude = 0;
+		int totalConfidence = 0;
+		int confidenceImage = 0;
+		int confidenceNASAStellite = 0;
+		int confidenceTwitterInfo = 0;
+
+		confidenceImage = scoringImage("C:/Users/Carlos/Desktop/imagenes/no llamas/no_llamas_1.jpg");
+		System.out.printf("Confidence of the image being of a fire: %d \n", confidenceImage);
+
+		confidenceNASAStellite = sconringSatellite(latitude, longitude);
+		System.out.printf("Confidence of the info provided by NASA satellites: %d \n", confidenceNASAStellite);
+
+		confidenceTwitterInfo = scoringTwitterInfo(latitude, longitude);
+		System.out.printf("Confidence of the info provided by Twitter: %d \n", confidenceTwitterInfo);
+
+		totalConfidence = (int) ((int) (confidenceImage * 0.3)) + ((int) (confidenceNASAStellite * 0.4))
+				+ ((int) (confidenceTwitterInfo * 0.4));
+		System.out.printf("Total confidence: %d \n", totalConfidence);
+	}
+
+	private int scoringTwitterInfo(float latitude, float longitude) {
+		int confidence = 0;
+
+		return confidence;
+	}
+
+	private int sconringSatellite(float latitude, float longitude) {
+		int confidence = 0;
+
+		return confidence;
+	}
+
+	private int scoringImage(String inputPath) {
 		BufferedImage imageInput = null;
 		File input_file = null;
 
 		try {
-			input_file = new File("C:/Users/Carlos/Desktop/imagenes/no llamas/no_llamas_1.jpg");
+			input_file = new File(inputPath);
 			imageInput = ImageIO.read(input_file);
-			System.out.println("Reading complete.");
 		} catch (IOException e) {
 			System.out.println("Error: " + e);
 		}
@@ -81,8 +147,7 @@ public class MiscCodeTest {
 
 		int confidence = analyzeFire(histogramReturn, width, height);
 
-		System.out.printf("Confidence of the image being of a fire: %d \n", confidence);
-		System.out.println("Test OK");
+		return confidence;
 	}
 
 	private int analyzeFire(int histogram[][], int width, int height) {
