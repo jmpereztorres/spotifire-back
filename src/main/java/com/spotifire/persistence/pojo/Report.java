@@ -48,6 +48,8 @@ public class Report implements IPojo {
 
 	private String type;
 
+	private Long twitterId;
+
 	/**
 	 * Default constructor
 	 */
@@ -135,6 +137,14 @@ public class Report implements IPojo {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Long getTwitterId() {
+		return twitterId;
+	}
+
+	public void setTwitterId(Long twitterId) {
+		this.twitterId = twitterId;
 	}
 
 	@Override
