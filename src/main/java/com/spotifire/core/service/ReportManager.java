@@ -1,5 +1,6 @@
 package com.spotifire.core.service;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 import java.util.function.Supplier;
@@ -63,7 +64,7 @@ public class ReportManager implements IReportService {
 	}
 
 	@Override
-	public void parseReportAndSave(ReportRequestDTO reportRequest) {
+	public void parseReportAndSave(ReportRequestDTO reportRequest, byte[] image) throws IOException {
 
 		Location location = new Location();
 		location.setLatitude(reportRequest.getLatitude());
@@ -72,12 +73,16 @@ public class ReportManager implements IReportService {
 		Author author = new Author();
 		author.setAlias(reportRequest.getDescription());
 		author.setSource(SourceType.SPOTIFIRE);
+		author.setCreationDate(Calendar.getInstance().getTime());
 
 		Report report = new Report();
 		report.setLocation(location);
 		report.setAuthor(author);
 		report.setCreationDate(Calendar.getInstance().getTime());
 		report.setDescription(reportRequest.getDescription());
+		report.setSource(SourceType.SPOTIFIRE);
+
+		report.setImage(image);
 
 		this.processReport(report);
 

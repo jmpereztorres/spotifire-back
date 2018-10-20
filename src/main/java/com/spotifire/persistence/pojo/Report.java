@@ -14,6 +14,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.spotifire.persistence.constants.ReportType;
+import com.spotifire.persistence.constants.SourceType;
+
 @Entity
 @Table(name = "REPORT")
 public class Report implements IPojo {
@@ -42,11 +45,11 @@ public class Report implements IPojo {
 
 	private Integer imageScore;
 
-	private String source;
+	private SourceType source;
 
 	private String description;
 
-	private String type;
+	private ReportType type;
 
 	private Long twitterId;
 
@@ -59,7 +62,7 @@ public class Report implements IPojo {
 
 	@Override
 	public Long getId() {
-		return id;
+		return this.id;
 	}
 
 	@Override
@@ -67,24 +70,24 @@ public class Report implements IPojo {
 		this.id = id;
 	}
 
-	public String getSource() {
-		return source;
+	public SourceType getSource() {
+		return this.source;
 	}
 
-	public void setSource(String source) {
+	public void setSource(SourceType source) {
 		this.source = source;
 	}
 
-	public String getType() {
-		return type;
+	public ReportType getType() {
+		return this.type;
 	}
 
-	public void setType(String type) {
+	public void setType(ReportType type) {
 		this.type = type;
 	}
 
 	public Author getAuthor() {
-		return author;
+		return this.author;
 	}
 
 	public void setAuthor(Author author) {
@@ -92,7 +95,7 @@ public class Report implements IPojo {
 	}
 
 	public Date getCreationDate() {
-		return creationDate;
+		return this.creationDate;
 	}
 
 	public void setCreationDate(Date creationDate) {
@@ -100,7 +103,7 @@ public class Report implements IPojo {
 	}
 
 	public Evidence getEvidence() {
-		return evidence;
+		return this.evidence;
 	}
 
 	public void setEvidence(Evidence evidence) {
@@ -108,7 +111,7 @@ public class Report implements IPojo {
 	}
 
 	public Boolean getHasImage() {
-		return hasImage;
+		return this.hasImage;
 	}
 
 	public void setHasImage(Boolean hasImage) {
@@ -116,7 +119,7 @@ public class Report implements IPojo {
 	}
 
 	public byte[] getImage() {
-		return image;
+		return this.image;
 	}
 
 	public void setImage(byte[] image) {
@@ -124,7 +127,7 @@ public class Report implements IPojo {
 	}
 
 	public Integer getImageScore() {
-		return imageScore;
+		return this.imageScore;
 	}
 
 	public void setImageScore(Integer imageScore) {
@@ -132,7 +135,7 @@ public class Report implements IPojo {
 	}
 
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	public void setDescription(String description) {
@@ -140,7 +143,7 @@ public class Report implements IPojo {
 	}
 
 	public Long getTwitterId() {
-		return twitterId;
+		return this.twitterId;
 	}
 
 	public void setTwitterId(Long twitterId) {
@@ -151,7 +154,7 @@ public class Report implements IPojo {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
 		return result;
 	}
 
@@ -163,22 +166,22 @@ public class Report implements IPojo {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		Report other = (Report) obj;
-		if (id == null) {
+		if (this.id == null) {
 			if (other.id != null) {
 				return false;
 			}
-		} else if (!id.equals(other.id)) {
+		} else if (!this.id.equals(other.id)) {
 			return false;
 		}
 		return true;
 	}
 
 	public Location getLocation() {
-		return location;
+		return this.location;
 	}
 
 	public void setLocation(Location location) {
@@ -188,10 +191,11 @@ public class Report implements IPojo {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Report [id=").append(id).append(", location=").append(location).append(", author=").append(author)
-				.append(", evidence=").append(evidence).append(", creationDate=").append(creationDate).append(", hasImage=")
-				.append(hasImage).append(", image=").append(Arrays.toString(image)).append(", imageScore=").append(imageScore)
-				.append(", source=").append(source).append(", description=").append(description).append(", type=").append(type).append("]");
+		builder.append("Report [id=").append(this.id).append(", location=").append(this.location).append(", author=").append(this.author)
+				.append(", evidence=").append(this.evidence).append(", creationDate=").append(this.creationDate).append(", hasImage=")
+				.append(this.hasImage).append(", image=").append(Arrays.toString(this.image)).append(", imageScore=")
+				.append(this.imageScore).append(", source=").append(this.source).append(", description=").append(this.description)
+				.append(", type=").append(this.type).append("]");
 		return builder.toString();
 	}
 
