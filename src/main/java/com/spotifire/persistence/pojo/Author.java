@@ -1,7 +1,6 @@
 
 package com.spotifire.persistence.pojo;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -10,9 +9,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.spotifire.persistence.constants.SourceType;
+
 @Entity
 @Table(name = "AUTHOR")
-public class Author implements Serializable {
+public class Author implements IPojo {
 
 	private static final long serialVersionUID = -1226244226635320029L;
 
@@ -24,7 +25,7 @@ public class Author implements Serializable {
 
 	private Date creationDate;
 
-	private String source;
+	private SourceType source;
 
 	/**
 	 * Default constructor
@@ -33,24 +34,26 @@ public class Author implements Serializable {
 		super();
 	}
 
+	@Override
 	public Long getId() {
-		return id;
+		return this.id;
 	}
 
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public String getSource() {
-		return source;
+	public SourceType getSource() {
+		return this.source;
 	}
 
-	public void setSource(String source) {
+	public void setSource(SourceType source) {
 		this.source = source;
 	}
 
 	public String getAlias() {
-		return alias;
+		return this.alias;
 	}
 
 	public void setAlias(String alias) {
@@ -58,7 +61,7 @@ public class Author implements Serializable {
 	}
 
 	public Date getCreationDate() {
-		return creationDate;
+		return this.creationDate;
 	}
 
 	public void setCreationDate(Date creationDate) {
@@ -69,7 +72,7 @@ public class Author implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
 		return result;
 	}
 
@@ -81,15 +84,15 @@ public class Author implements Serializable {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		Author other = (Author) obj;
-		if (id == null) {
+		if (this.id == null) {
 			if (other.id != null) {
 				return false;
 			}
-		} else if (!id.equals(other.id)) {
+		} else if (!this.id.equals(other.id)) {
 			return false;
 		}
 		return true;
@@ -98,8 +101,8 @@ public class Author implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Author [id=").append(id).append(", alias=").append(alias).append(", creationDate=").append(creationDate)
-				.append(", source=").append(source).append("]");
+		builder.append("Author [id=").append(this.id).append(", alias=").append(this.alias).append(", creationDate=")
+				.append(this.creationDate).append(", source=").append(this.source).append("]");
 		return builder.toString();
 	}
 

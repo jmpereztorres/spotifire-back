@@ -1,8 +1,6 @@
 
 package com.spotifire.persistence.pojo;
 
-import java.io.Serializable;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "LOCATION")
-public class Location implements Serializable {
+public class Location implements IPojo {
 
 	private static final long serialVersionUID = 884481365051808146L;
 
@@ -34,10 +32,12 @@ public class Location implements Serializable {
 		super();
 	}
 
+	@Override
 	public Long getId() {
 		return id;
 	}
 
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}

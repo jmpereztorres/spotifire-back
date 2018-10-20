@@ -1,17 +1,18 @@
 package com.spotifire.persistence.repository;
 
-import java.io.Serializable;
 import java.util.List;
+
+import com.spotifire.persistence.pojo.IPojo;
 
 public interface ITransactionalRepository {
 
 	<T> Long countByExample(T example);
 
-	void delete(Serializable object);
+	void delete(IPojo object);
 
 	<T> List<T> findByExample(T example);
 
-	<T> T getObjectById(Serializable id, Class<T> clazz);
+	<T> T getObjectById(IPojo id, Class<T> clazz);
 
 	<T> T save(T object);
 

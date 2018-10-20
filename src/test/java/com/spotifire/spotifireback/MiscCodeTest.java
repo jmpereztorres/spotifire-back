@@ -25,8 +25,7 @@ import com.spotifire.web.rest.dto.WeatherDTO;
 
 /**
  *
- * Para probar código suelto, sin referencias al contexto de Spring y sus
- * service, manager y dao
+ * Para probar código suelto, sin referencias al contexto de Spring y sus service, manager y dao
  *
  * @author aars
  *

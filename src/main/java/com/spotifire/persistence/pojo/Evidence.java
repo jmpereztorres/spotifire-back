@@ -1,7 +1,6 @@
 
 package com.spotifire.persistence.pojo;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "EVIDENCE")
-public class Evidence implements Serializable {
+public class Evidence implements IPojo {
 
 	private static final long serialVersionUID = 2655245967256383752L;
 
@@ -44,10 +43,12 @@ public class Evidence implements Serializable {
 		super();
 	}
 
+	@Override
 	public Long getId() {
 		return id;
 	}
 
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
