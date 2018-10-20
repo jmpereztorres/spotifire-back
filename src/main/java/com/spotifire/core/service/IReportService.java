@@ -1,6 +1,7 @@
 package com.spotifire.core.service;
 
 import com.spotifire.persistence.pojo.Report;
+import com.spotifire.web.rest.dto.FireDTO;
 import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 public interface IReportService {
@@ -10,4 +11,6 @@ public interface IReportService {
 	public Report saveReport(Report report);
 
 	public void parseReportAndSave(ReportRequestDTO reportRequest);
+
+	FireDTO findFiresByLocation(ReportRequestDTO reportRequestDTO);
 }

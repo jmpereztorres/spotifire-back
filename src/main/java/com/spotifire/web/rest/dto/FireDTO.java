@@ -8,6 +8,8 @@ public class FireDTO {
 
 	private List<Evidence> evidences;
 
+	private List<Evidence> alerts;
+
 	private List<NasaFireDTO> nasaFires;
 
 	public FireDTO() {
@@ -28,6 +30,14 @@ public class FireDTO {
 
 	public void setNasaFires(List<NasaFireDTO> nasaFires) {
 		this.nasaFires = nasaFires;
+	}
+
+	public List<Evidence> getAlerts() {
+		return alerts;
+	}
+
+	public void setAlerts(List<Evidence> alerts) {
+		this.alerts = alerts;
 	}
 
 }
