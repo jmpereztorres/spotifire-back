@@ -3,6 +3,7 @@ package com.spotifire.spotifireback;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -15,6 +16,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.spotifire.config.EmptyConfig;
+import com.spotifire.core.utils.SpotifireUtils;
+import com.spotifire.persistence.pojo.Location;
+import com.spotifire.persistence.pojo.Report;
+
+import twitter4j.Query;
+import twitter4j.QueryResult;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 
 /**
  *
@@ -36,6 +47,48 @@ public class MiscCodeTest {
 		System.out.println("Testing checkConfiguration...");
 		LOGGER.debug("EEEEES");
 		System.out.println("Test Init");
+	}
+
+	@Test
+	public void fetchTwitter() {
+		Twitter twitter = new TwitterFactory().getInstance();
+		// Twitter Consumer key & Consumer Secret
+		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
+		// Twitter Access token & Access token Secret
+		twitter.setOAuthAccessToken(
+				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
+
+		Query query = new Query();
+		query.setQuery("#spotifire");
+		query.setCount(100);
+		List<Status> statuses = null;
+		try {
+			QueryResult queryResult = twitter.search(query);
+			statuses = queryResult.getTweets();
+			System.out.println(statuses.size());
+			statuses.stream().forEach(tweet ->{
+			Report report = new Report();
+			report.setTwitterId(tweet.getId());
+
+//			List<Report> persistedReports = this.repo.findByExample(report);
+//			if(SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
+//
+//			}
+
+			report.setCreationDate(tweet.getCreatedAt());
+			if(tweet.getGeoLocation() != null) {
+			report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
+			}
+
+			report.setSource(source);
+			report.setDescription(tweet.getText());
+			report.setHasImage(hasImage);
+			System.out.println(tweet.getText() + "\n"))};
+
+
+		} catch (Exception e) {
+		}
+		System.out.println("OK");
 	}
 
 	@Test
