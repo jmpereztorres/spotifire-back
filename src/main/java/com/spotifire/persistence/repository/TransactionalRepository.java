@@ -17,6 +17,9 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 import javax.transaction.Transactional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.hibernate.mapping.Collection;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +30,8 @@ import com.spotifire.persistence.pojo.IPojo;
 @Repository
 @Transactional
 public class TransactionalRepository implements ITransactionalRepository {
+
+	private static final Logger LOGGER = LogManager.getLogger(TransactionalRepository.class);
 
 	@PersistenceContext
 	private EntityManager em;
@@ -49,8 +54,6 @@ public class TransactionalRepository implements ITransactionalRepository {
 			Object persistedPojo = em.find(object.getClass(), object.getId());
 			em.remove(persistedPojo);
 		}
-
-		em.close();
 
 	}
 
@@ -95,7 +98,7 @@ public class TransactionalRepository implements ITransactionalRepository {
 					}
 					//
 
-				} else {
+				} else if (!Collection.class.isAssignableFrom(a.getJavaType())) {
 					if (attributeValue != null) {
 						p = cb.and(p, cb.equal(r.get(name), attributeValue));
 					}
@@ -104,11 +107,10 @@ public class TransactionalRepository implements ITransactionalRepository {
 			cq.select(r).where(p);
 			TypedQuery<T> query = em.createQuery(cq);
 			///////////////////////////////////////
-			System.out.println(query.unwrap(org.hibernate.query.Query.class).getQueryString());
+			LOGGER.debug(query.unwrap(org.hibernate.query.Query.class).getQueryString());
 			results = query.getResultList();
 		}
 
-		em.close();
 		if (results != null) {
 			results = results.stream().distinct().collect(Collectors.toList());
 		}
@@ -119,20 +121,21 @@ public class TransactionalRepository implements ITransactionalRepository {
 	@Override
 	public <T> T getObjectById(IPojo id, Class<T> clazz) {
 		T object = em.find(clazz, id);
-		em.close();
 		return object;
 	}
 
 	@Override
 	public <T> T save(T object) {
-
-		if (object != null && object instanceof IPojo && ((IPojo) object).getId() != null) {
-			em.merge(object);
-		} else {
-			em.persist(object);
+		if (object != null) {
+			em.getTransaction().begin();
+			if (object instanceof IPojo && ((IPojo) object).getId() != null) {
+				em.merge(object);
+			} else {
+				em.persist(object);
+			}
+			em.getTransaction().commit();
 		}
 
-		em.close();
 		return object;
 	}
 

@@ -1,8 +1,10 @@
 package com.spotifire.spotifireback;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -16,7 +18,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import com.spotifire.config.EmptyConfig;
-import com.spotifire.core.utils.SpotifireUtils;
+import com.spotifire.persistence.constants.ReportType;
+import com.spotifire.persistence.constants.SourceType;
+import com.spotifire.persistence.constants.SpotifireConstants;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
 
@@ -47,48 +51,6 @@ public class MiscCodeTest {
 		System.out.println("Testing checkConfiguration...");
 		LOGGER.debug("EEEEES");
 		System.out.println("Test Init");
-	}
-
-	@Test
-	public void fetchTwitter() {
-		Twitter twitter = new TwitterFactory().getInstance();
-		// Twitter Consumer key & Consumer Secret
-		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
-		// Twitter Access token & Access token Secret
-		twitter.setOAuthAccessToken(
-				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
-
-		Query query = new Query();
-		query.setQuery("#spotifire");
-		query.setCount(100);
-		List<Status> statuses = null;
-		try {
-			QueryResult queryResult = twitter.search(query);
-			statuses = queryResult.getTweets();
-			System.out.println(statuses.size());
-			statuses.stream().forEach(tweet ->{
-			Report report = new Report();
-			report.setTwitterId(tweet.getId());
-
-//			List<Report> persistedReports = this.repo.findByExample(report);
-//			if(SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
-//
-//			}
-
-			report.setCreationDate(tweet.getCreatedAt());
-			if(tweet.getGeoLocation() != null) {
-			report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
-			}
-
-//			report.setSource(source);
-			report.setDescription(tweet.getText());
-//			report.setHasImage(hasImage);
-			System.out.println(tweet.getText() + "\n"))};
-
-
-		} catch (Exception e) {
-		}
-		System.out.println("OK");
 	}
 
 	@Test
@@ -184,5 +146,57 @@ public class MiscCodeTest {
 		}
 
 		return confidence;
+	}
+
+	@Test
+	public void fetchTwitter() {
+		Twitter twitter = new TwitterFactory().getInstance();
+		// Twitter Consumer key & Consumer Secret
+		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
+		// Twitter Access token & Access token Secret
+		twitter.setOAuthAccessToken(
+				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
+
+		Query query = new Query();
+		query.setQuery(SpotifireConstants.SPOTIFIRE_TWITTER_HASHTAG);
+		query.setCount(100);
+		List<Status> statuses = null;
+		try {
+			QueryResult queryResult = twitter.search(query);
+			statuses = queryResult.getTweets();
+			statuses.stream().forEach(tweet -> {
+
+				Report report = new Report();
+				report.setCreationDate(tweet.getCreatedAt());
+				report.setSource(SourceType.TWITTER.toString());
+				report.setType(ReportType.FIRE.toString());
+				report.setDescription(tweet.getText());
+
+				if (tweet.getGeoLocation() != null) {
+					report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
+				}
+
+				if (tweet.getMediaEntities() != null && tweet.getMediaEntities().length > 0
+						&& tweet.getMediaEntities()[0].getType().equals("photo")) {
+
+					try {
+						URL url = new URL(tweet.getMediaEntities()[0].getMediaURL());
+						BufferedImage image = ImageIO.read(url);
+
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						ImageIO.write(image, "jpg", baos);
+						baos.flush();
+						report.setHasImage(true);
+						report.setImage(baos.toByteArray());
+					} catch (IOException e) {
+						LOGGER.error("Error reading tweet image");
+					}
+				}
+
+			});
+
+		} catch (Exception e) {
+		}
+		System.out.println("OK");
 	}
 }

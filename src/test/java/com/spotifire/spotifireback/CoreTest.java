@@ -1,9 +1,14 @@
 package com.spotifire.spotifireback;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,8 +22,14 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.client.RestTemplate;
 
 import com.spotifire.SpotifireBackApplication;
+import com.spotifire.core.service.IReportService;
+import com.spotifire.core.utils.SpotifireUtils;
+import com.spotifire.persistence.constants.ReportType;
+import com.spotifire.persistence.constants.SourceType;
+import com.spotifire.persistence.constants.SpotifireConstants;
 import com.spotifire.persistence.pojo.Evidence;
 import com.spotifire.persistence.pojo.Location;
+import com.spotifire.persistence.pojo.Report;
 import com.spotifire.persistence.repository.ITransactionalRepository;
 
 import twitter4j.Query;
@@ -41,6 +52,9 @@ public class CoreTest {
 	@Autowired
 	private ITransactionalRepository repo;
 
+	@Autowired
+	private IReportService reportService;
+
 	@Test
 	public void contextLoads() {
 		System.out.println("OK");
@@ -56,20 +70,51 @@ public class CoreTest {
 				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
 
 		Query query = new Query();
-		query.setQuery("fire");
-
+		query.setQuery(SpotifireConstants.SPOTIFIRE_TWITTER_HASHTAG);
+		query.setCount(100);
 		List<Status> statuses = null;
 		try {
 			QueryResult queryResult = twitter.search(query);
-			// // Getting Twitter Timeline using Twitter4j API
-			// ResponseList statusReponseList = twitter.getUserTimeline(new Paging(1, 5));
-			// for (Status status : statusReponseList) {
-			// System.out.println(status.getText());
-			// }
-			// // Post a Tweet using Twitter4j API
-			// Status status = twitter.updateStatus("Hello");
-			// System.out.println("Successfully updated the status to [" + status.getText() + "].");
 			statuses = queryResult.getTweets();
+			statuses.stream().forEach(tweet -> {
+
+				Report report = new Report();
+				report.setTwitterId(tweet.getId());
+
+				List<Report> persistedReports = this.repo.findByExample(report);
+				if (SpotifireUtils.isNotNullNorEmpty(persistedReports)) {
+
+					report.setCreationDate(tweet.getCreatedAt());
+					report.setSource(SourceType.TWITTER.toString());
+					report.setType(ReportType.FIRE.toString());
+					report.setDescription(tweet.getText());
+
+					if (tweet.getGeoLocation() != null) {
+						report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
+					}
+
+					if (tweet.getMediaEntities() != null && tweet.getMediaEntities().length > 0
+							&& tweet.getMediaEntities()[0].getType().equals("photo")) {
+
+						try {
+							URL url = new URL(tweet.getMediaEntities()[0].getMediaURL());
+							BufferedImage image = ImageIO.read(url);
+
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							ImageIO.write(image, "jpg", baos);
+							baos.flush();
+							report.setHasImage(true);
+							report.setImage(baos.toByteArray());
+						} catch (IOException e) {
+							LOGGER.error("Error reading tweet image");
+						}
+
+					}
+
+					this.reportService.processReport(report);
+				}
+			});
+
 		} catch (Exception e) {
 		}
 		System.out.println("OK");
@@ -92,6 +137,12 @@ public class CoreTest {
 
 			this.repo.save(evidence);
 		});
+	}
+
+	@Test
+	public void asdads() {
+		List<Evidence> list = this.repo.findByExample(new Evidence());
+		System.out.println("Test OK");
 	}
 
 	@Test
