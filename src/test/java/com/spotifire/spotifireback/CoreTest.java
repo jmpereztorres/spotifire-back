@@ -91,7 +91,7 @@ public class CoreTest {
 					// base data
 					report.setCreationDate(tweet.getCreatedAt());
 					report.setSource(SourceType.TWITTER);
-					report.setType(ReportType.FIRE.toString());
+					report.setType(ReportType.FIRE);
 					report.setDescription(tweet.getText());
 
 					// location

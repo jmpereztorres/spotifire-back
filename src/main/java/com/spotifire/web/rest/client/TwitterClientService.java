@@ -67,7 +67,7 @@ public class TwitterClientService implements ITwitterClientService {
 
 					report.setCreationDate(tweet.getCreatedAt());
 					report.setSource(SourceType.TWITTER);
-					report.setType(ReportType.FIRE.toString());
+					report.setType(ReportType.FIRE);
 					report.setDescription(tweet.getText());
 
 					if (tweet.getGeoLocation() != null) {
