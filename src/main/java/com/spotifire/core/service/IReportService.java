@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spotifire.persistence.pojo.Report;
+import com.spotifire.web.rest.dto.FireDTO;
 import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 public interface IReportService {
@@ -15,4 +16,5 @@ public interface IReportService {
 
 	void parseReportAndSave(ReportRequestDTO reportRequest, MultipartFile file) throws IOException;
 
+	FireDTO findFiresByLocation(ReportRequestDTO reportRequestDTO);
 }
