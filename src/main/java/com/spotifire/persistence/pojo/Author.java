@@ -1,7 +1,6 @@
 
 package com.spotifire.persistence.pojo;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -12,7 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "AUTHOR")
-public class Author implements Serializable {
+public class Author implements IPojo {
 
 	private static final long serialVersionUID = -1226244226635320029L;
 
@@ -33,10 +32,12 @@ public class Author implements Serializable {
 		super();
 	}
 
+	@Override
 	public Long getId() {
 		return id;
 	}
 
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
