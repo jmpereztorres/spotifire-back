@@ -28,11 +28,33 @@ public class ReportManager implements IReportService {
 
 	@Override
 	public Report processReport(Report report) {
+
 		if (report.getImage() != null) {
 			report.setImageScore(ImageUtils.scoringImage(report.getImage()));
 		}
 
+		List<Evidence> evidences = this.transactionalRepository.findByExample(new Evidence());
+
+		Evidence persisted = null;
+		if (evidences != null) {
+			persisted = evidences.stream().filter(evidence -> SpotifireUtils.distance(evidence.getLocation(), report.getLocation()) < 15000)
+					.sorted((evidence1, evidence2) ->
+
+					Double.compare(SpotifireUtils.distance(evidence1.getLocation(), report.getLocation()),
+							SpotifireUtils.distance(evidence2.getLocation(), report.getLocation())))
+					.findFirst().orElse(null);
+
+		}
+
+		report.setEvidence(persisted != null ? persisted : this.createEvidence(report));
+
 		return this.saveReport(report);
+	}
+
+	private Evidence createEvidence(Report report) {
+		Evidence evidence = new Evidence();
+
+		return evidence;
 	}
 
 	@Override
