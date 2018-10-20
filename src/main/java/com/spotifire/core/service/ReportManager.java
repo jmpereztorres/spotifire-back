@@ -1,12 +1,18 @@
 package com.spotifire.core.service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +48,7 @@ public class ReportManager implements IReportService {
 	}
 
 	@Override
-	public void parseReportAndSave(ReportRequestDTO reportRequest, byte[] image) throws IOException {
+	public void parseReportAndSave(ReportRequestDTO reportRequest) throws IOException {
 
 		Location location = new Location();
 		location.setLatitude(reportRequest.getLatitude());
@@ -60,7 +66,18 @@ public class ReportManager implements IReportService {
 		report.setDescription(reportRequest.getDescription());
 		report.setSource(SourceType.SPOTIFIRE);
 
-		report.setImage(image);
+		if (reportRequest.getImageId() != null || reportRequest.getImageId() != "") {
+			Path dir = Paths.get("pictures");
+			File file = Paths.get(dir + File.separator + reportRequest.getImageId()).toFile();
+
+			if (file.exists()) {
+				InputStream is = new FileInputStream(file);
+				report.setImage(IOUtils.toByteArray(is));
+				report.setHasImage(true);
+			}
+		} else {
+			report.setHasImage(false);
+		}
 
 		this.processReport(report);
 
