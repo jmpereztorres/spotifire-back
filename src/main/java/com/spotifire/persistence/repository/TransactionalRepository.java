@@ -127,13 +127,11 @@ public class TransactionalRepository implements ITransactionalRepository {
 	@Override
 	public <T> T save(T object) {
 		if (object != null) {
-			em.getTransaction().begin();
 			if (object instanceof IPojo && ((IPojo) object).getId() != null) {
 				em.merge(object);
 			} else {
 				em.persist(object);
 			}
-			em.getTransaction().commit();
 		}
 
 		return object;
