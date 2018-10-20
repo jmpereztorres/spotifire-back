@@ -1,7 +1,13 @@
 package com.spotifire.persistence.constants;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum ReportType {
 
-	FIRE, PREVENTION;
+	@JsonProperty("FIRE")
+	FIRE,
+
+	@JsonProperty("PREVENTION")
+	PREVENTION;
 
 }

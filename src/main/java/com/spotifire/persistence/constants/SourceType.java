@@ -1,7 +1,13 @@
 package com.spotifire.persistence.constants;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum SourceType {
 
-	TWITTER, SPOTIFIRE;
+	@JsonProperty("TWITTER")
+	TWITTER,
+
+	@JsonProperty("SPOTIFIRE")
+	SPOTIFIRE;
 
 }

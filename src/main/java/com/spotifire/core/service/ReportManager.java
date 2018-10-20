@@ -7,10 +7,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.spotifire.core.utils.ImageUtils;
 import com.spotifire.core.utils.SpotifireUtils;
@@ -44,7 +42,7 @@ public class ReportManager implements IReportService {
 	}
 
 	@Override
-	public void parseReportAndSave(ReportRequestDTO reportRequest, MultipartFile file) throws IOException {
+	public void parseReportAndSave(ReportRequestDTO reportRequest, byte[] image) throws IOException {
 
 		Location location = new Location();
 		location.setLatitude(reportRequest.getLatitude());
@@ -62,16 +60,7 @@ public class ReportManager implements IReportService {
 		report.setDescription(reportRequest.getDescription());
 		report.setSource(SourceType.SPOTIFIRE);
 
-		byte[] bytes;
-
-		try {
-			bytes = IOUtils.toByteArray(file.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw e;
-		}
-
-		report.setImage(bytes);
+		report.setImage(image);
 
 		this.processReport(report);
 
