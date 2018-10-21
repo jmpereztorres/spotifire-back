@@ -41,6 +41,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spotifire.config.EmptyConfig;
+import com.spotifire.core.utils.SpotifireUtils;
 import com.spotifire.persistence.constants.ReportType;
 import com.spotifire.persistence.constants.SourceType;
 import com.spotifire.persistence.constants.SpotifireConstants;
@@ -126,8 +127,9 @@ public class MiscCodeTest {
 				if (columns != null) {
 					report.setCreationDate(parseDateFromCsvFile(columns[5] + columns[6], "yyyy-MM-ddhhmm"));
 					report.setType(ReportType.FIRE);
-					report.setScore(
-							scoringSatelliteData(Double.valueOf(columns[2]), Double.valueOf(columns[10]), Double.valueOf(columns[11])));
+					report.setScore(this.scoringSatelliteData(Double.valueOf(columns[2]), Double.valueOf(columns[10]),
+							Double.valueOf(columns[11])));
+
 					report.setLocation(new Location(Double.valueOf(columns[0]), Double.valueOf(columns[1])));
 				}
 				reportList.add(report);
@@ -175,9 +177,9 @@ public class MiscCodeTest {
 		double coeficienBrightness2 = 0.1297;
 		double coeficientPower = 0.1747;
 
-		double calculationBrightness1 = calculateCuadraticMinimum(brightness1, maxBrightness1, minBrightness1) * coeficienBrightness1;
-		double calculationBrightness2 = calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2) * coeficienBrightness2;
-		double calculationPower = calculateCuadraticMinimum(power, maxPower, minPower) * coeficientPower;
+		double calculationBrightness1 = this.calculateCuadraticMinimum(brightness1, maxBrightness1, minBrightness1) * coeficienBrightness1;
+		double calculationBrightness2 = this.calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2) * coeficienBrightness2;
+		double calculationPower = this.calculateCuadraticMinimum(power, maxPower, minPower) * coeficientPower;
 
 		int result = (int) (calculationBrightness1 + calculationBrightness2 + calculationPower) * 100;
 
@@ -344,7 +346,7 @@ public class MiscCodeTest {
 
 		}
 
-		int confidence = analyzeFire(histogramReturn, width, height);
+		int confidence = this.analyzeFire(histogramReturn, width, height);
 
 		System.out.println("Histogram Red.");
 
@@ -369,9 +371,9 @@ public class MiscCodeTest {
 	}
 
 	private int analyzeFire(int histogram[][], int width, int height) {
-		int meanHistogramRed = calculateHighMeanHistogram(histogram[0], width, height);
-		int meanHistogramGreen = calculateHighMeanHistogram(histogram[1], width, height);
-		int meanHistogramBlue = calculateHighMeanHistogram(histogram[2], width, height);
+		int meanHistogramRed = this.calculateHighMeanHistogram(histogram[0], width, height);
+		int meanHistogramGreen = this.calculateHighMeanHistogram(histogram[1], width, height);
+		int meanHistogramBlue = this.calculateHighMeanHistogram(histogram[2], width, height);
 
 		double numberOfPixels = width * height;
 
@@ -385,7 +387,7 @@ public class MiscCodeTest {
 		System.out.printf("Histogram Green mean %d \n", meanHistogramGreen);
 		System.out.printf("Histogram Blue mean %d \n", meanHistogramBlue);
 
-		int confidence = calculateConfidence(meanHistogramRed, meanHistogramGreen, meanHistogramBlue);
+		int confidence = this.calculateConfidence(meanHistogramRed, meanHistogramGreen, meanHistogramBlue);
 
 		return confidence;
 	}
@@ -479,6 +481,53 @@ public class MiscCodeTest {
 
 		} catch (Exception e) {
 		}
+	}
+
+	@Test
+	public void testCentralLongitude() {
+
+		Report r1 = new Report();
+		Report r2 = new Report();
+		Report r3 = new Report();
+		Report r4 = new Report();
+		Report r5 = new Report();
+
+		Location l1 = new Location();
+		l1.setLatitude(42.9336785);
+		l1.setLongitude(-72.2272968);
+		r1.setLocation(l1);
+
+		Location l2 = new Location();
+		l2.setLatitude(42.9185950);
+		l2.setLongitude(-72.2249794);
+		r2.setLocation(l2);
+
+		Location l3 = new Location();
+		l3.setLatitude(42.9180293);
+		l3.setLongitude(-72.2531748);
+		r3.setLocation(l3);
+
+		Location l4 = new Location();
+		l4.setLatitude(42.9335843);
+		l4.setLongitude(-72.2560072);
+		r4.setLocation(l4);
+
+		Location l5 = new Location();
+		l5.setLatitude(42.9337728);
+		l5.setLongitude(-72.2284555);
+		r5.setLocation(l5);
+
+		List<Report> reportList = new ArrayList<>();
+		reportList.add(r1);
+		reportList.add(r2);
+		reportList.add(r3);
+		reportList.add(r4);
+		reportList.add(r5);
+
+		Location center = SpotifireUtils.getCentralReportLocation(reportList);
+
+		System.out.println(center.getLatitude());
+		System.out.println(center.getLongitude());
 
 	}
 

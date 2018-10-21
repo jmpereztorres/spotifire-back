@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.spotifire.core.utils.ImageUtils;
 import com.spotifire.core.utils.SpotifireUtils;
@@ -30,6 +32,7 @@ import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
 import com.spotifire.persistence.repository.ITransactionalRepository;
 import com.spotifire.web.rest.dto.FireDTO;
+import com.spotifire.web.rest.dto.NotificationDTO;
 import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 @Service
@@ -134,8 +137,8 @@ public class ReportManager implements IReportService {
 
 				.map(evidence -> fillDistance(reportRequestDTO, evidence));
 
-		fireDTO.setEvidences(supplier.get().filter(report -> report.getConfidence() >= 70).collect(Collectors.toList()));
-		fireDTO.setAlerts(supplier.get().filter(report -> report.getConfidence() < 70).collect(Collectors.toList()));
+		fireDTO.setEvidences(supplier.get().filter(evidence -> evidence.getConfidence() >= 70).collect(Collectors.toList()));
+		fireDTO.setAlerts(supplier.get().filter(evidence -> evidence.getConfidence() < 70).collect(Collectors.toList()));
 
 		return fireDTO;
 	}
@@ -168,4 +171,57 @@ public class ReportManager implements IReportService {
 
 		return evidence;
 	}
+
+	@Override
+	public NotificationDTO createPushNotification(ReportRequestDTO reportRequestDTO) {
+
+		List<Evidence> evidenceList = this.transactionalRepository.findByExample(new Evidence());
+
+		double radius = 20000;
+
+		Supplier<Stream<Evidence>> supplier = () -> evidenceList.stream()
+				.filter(evidence -> SpotifireUtils.distance(evidence.getLocation().getLatitude(), reportRequestDTO.getLatitude(),
+						evidence.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < radius)
+				.map(evidence -> fillDistance(reportRequestDTO, evidence));
+
+		NotificationDTO notification = new NotificationDTO();
+
+		List<Evidence> nearEvidences = supplier.get().collect(Collectors.toList());
+
+		if (!CollectionUtils.isEmpty(nearEvidences)) {
+
+			Evidence evidence = evidenceList.get(0);
+
+			notification.setId(UUID.randomUUID().toString());
+			notification.setRadius(radius);
+
+			String title;
+			String text;
+
+			if (evidence.getConfidence() >= 70) {
+
+				title = "Fire evidence near!";
+				text = "Find a safe place!";
+
+			} else {
+
+				title = "Fire alert near!";
+				text = "Take care!";
+
+			}
+
+			notification.setTitle(title);
+			notification.setText(text);
+
+			Location location = SpotifireUtils.getCentralReportLocation(evidence.getReports());
+
+			notification.setLatitude(location.getLatitude());
+			notification.setLongitude(location.getLongitude());
+
+		}
+
+		return notification;
+
+	}
+
 }

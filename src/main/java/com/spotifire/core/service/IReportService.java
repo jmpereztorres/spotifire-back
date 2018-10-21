@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import com.spotifire.persistence.pojo.Report;
 import com.spotifire.web.rest.dto.FireDTO;
+import com.spotifire.web.rest.dto.NotificationDTO;
 import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 public interface IReportService {
@@ -17,4 +18,6 @@ public interface IReportService {
 	FireDTO findFiresByLocation(ReportRequestDTO reportRequestDTO);
 
 	FireDTO findTypedFiresByLocation(ReportRequestDTO reportRequestDTO);
+
+	NotificationDTO createPushNotification(ReportRequestDTO reportRequestDTO);
 }
