@@ -12,7 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spotifire.persistence.constants.ReportType;
 
 @Entity
@@ -36,6 +38,10 @@ public class Evidence implements IPojo {
 
 	private ReportType type;
 
+	@Transient
+	private double distance;
+
+	@JsonIgnore
 	@OneToMany(mappedBy = "evidence")
 	private List<Report> reports;
 
@@ -102,6 +108,14 @@ public class Evidence implements IPojo {
 
 	public void setReports(List<Report> reports) {
 		this.reports = reports;
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+
+	public void setDistance(double distance) {
+		this.distance = distance;
 	}
 
 	@Override

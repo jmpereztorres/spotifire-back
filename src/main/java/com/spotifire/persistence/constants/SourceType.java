@@ -8,6 +8,9 @@ public enum SourceType {
 	TWITTER,
 
 	@JsonProperty("SPOTIFIRE")
-	SPOTIFIRE;
+	SPOTIFIRE,
+
+	@JsonProperty("NASA")
+	NASA;
 
 }

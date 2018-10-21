@@ -18,6 +18,7 @@ import com.spotifire.core.utils.SpotifireUtils;
 import com.spotifire.persistence.constants.ReportType;
 import com.spotifire.persistence.constants.SourceType;
 import com.spotifire.persistence.constants.SpotifireConstants;
+import com.spotifire.persistence.pojo.Evidence;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
 import com.spotifire.persistence.repository.ITransactionalRepository;
@@ -98,6 +99,19 @@ public class TwitterClientService implements ITwitterClientService {
 
 		} catch (Exception e) {
 		}
+
+	}
+
+	@Override
+	public void reportEvidence(Evidence evidence) {
+
+		Twitter twitter = new TwitterFactory().getInstance();
+		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
+		twitter.setOAuthAccessToken(
+				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
+
+		// Status status = twitter.updateStatus(latestStatus);
+		System.out.println("Successfully updated the status to [" + status.getText() + "].");
 
 	}
 

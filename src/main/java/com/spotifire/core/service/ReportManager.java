@@ -129,12 +129,21 @@ public class ReportManager implements IReportService {
 
 		Supplier<Stream<Evidence>> supplier = () -> evidenceList.stream()
 				.filter(report -> SpotifireUtils.distance(report.getLocation().getLatitude(), reportRequestDTO.getLatitude(),
-						report.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 50000);
+						report.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 20000)
+
+				.map(evidence -> fillDistance(reportRequestDTO, evidence));
 
 		fireDTO.setEvidences(supplier.get().filter(report -> report.getConfidence() >= 70).collect(Collectors.toList()));
 		fireDTO.setAlerts(supplier.get().filter(report -> report.getConfidence() < 70).collect(Collectors.toList()));
 
 		return fireDTO;
+	}
+
+	private static Evidence fillDistance(ReportRequestDTO reportRequestDTO, Evidence evidence) {
+		evidence.setDistance(SpotifireUtils.distance(reportRequestDTO.getLatitude(), evidence.getLocation().getLatitude(),
+				reportRequestDTO.getLongitude(), evidence.getLocation().getLongitude(), 0, 0));
+
+		return evidence;
 	}
 
 }
