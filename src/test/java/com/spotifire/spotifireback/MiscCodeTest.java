@@ -1,17 +1,18 @@
 package com.spotifire.spotifireback;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -27,25 +28,39 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.expression.ParseException;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spotifire.config.EmptyConfig;
 import com.spotifire.persistence.constants.ReportType;
+import com.spotifire.persistence.constants.SourceType;
+import com.spotifire.persistence.constants.SpotifireConstants;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
+import com.spotifire.web.rest.dto.GeolocationDTO;
 import com.spotifire.web.rest.dto.WeatherDTO;
+
+import twitter4j.Query;
+import twitter4j.QueryResult;
+import twitter4j.Status;
+import twitter4j.StatusUpdate;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 
 /**
  *
- * Para probar código suelto, sin referencias al contexto de Spring y sus
- * service, manager y dao
+ * Para probar código suelto, sin referencias al contexto de Spring y sus service, manager y dao
  *
  * @author aars
  *
@@ -66,13 +81,46 @@ public class MiscCodeTest {
 	}
 
 	@Test
-	public void testSatelliteData()
-			throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+	@Rollback(false)
+	public void publishTweet() throws RestClientException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+		Twitter twitter = new TwitterFactory().getInstance();
+		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
+		twitter.setOAuthAccessToken(
+				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SpotifireConstants.GEOCODE_API_URL)
+				.queryParam(SpotifireConstants.GEOCODE_API_FORMAT_PARAM, SpotifireConstants.JSON_FORMAT)
+				.queryParam(SpotifireConstants.GEOCODE_API_LATITUDE_PARAM, 39.420143)
+				.queryParam(SpotifireConstants.GEOCODE_API_LONGITUDE_PARAM, -0.457176);
+
+		HttpEntity<GeolocationDTO> response = this.getNasaRestTemplate().exchange(builder.toUriString(), HttpMethod.GET, null,
+				GeolocationDTO.class);
+
+		if (response != null) {
+
+			GeolocationDTO geolocation = response.getBody();
+
+			String tweet = String.format(SpotifireConstants.TWEET_MESSAGE,
+					geolocation.getAddress().getVillage() != null ? geolocation.getAddress().getVillage()
+							: geolocation.getAddress().getTown(),
+
+					geolocation.getAddress().getCounty());
+			try {
+				StatusUpdate statusTweet = new StatusUpdate(tweet);
+				twitter.updateStatus(statusTweet);
+			} catch (TwitterException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+
+	}
+
+	@Test
+	public void testSatelliteData() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		System.out.println("Testing testSatelliteData...");
 		LOGGER.debug("EEEEES");
 		System.out.println("Test Init");
-		URI uriPetition = new URI(
-				"https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/MODIS_C6_Europe_24h.csv");
+		URI uriPetition = new URI("https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/MODIS_C6_Europe_24h.csv");
 		RestTemplate nasaRestTemplate = this.getNasaRestTemplate();
 		ResponseEntity<String> response = nasaRestTemplate.exchange(uriPetition, HttpMethod.GET, null, String.class);
 
@@ -86,8 +134,8 @@ public class MiscCodeTest {
 				if (columns != null) {
 					report.setCreationDate(parseDateFromCsvFile(columns[5] + columns[6], "yyyy-MM-ddhhmm"));
 					report.setType(ReportType.FIRE);
-					report.setScore(scoringSatelliteData(Double.valueOf(columns[2]), Double.valueOf(columns[10]),
-							Double.valueOf(columns[11])));
+					report.setScore(
+							scoringSatelliteData(Double.valueOf(columns[2]), Double.valueOf(columns[10]), Double.valueOf(columns[11])));
 					report.setLocation(new Location(Double.valueOf(columns[0]), Double.valueOf(columns[1])));
 				}
 				reportList.add(report);
@@ -110,8 +158,7 @@ public class MiscCodeTest {
 		return res;
 	}
 
-	private RestTemplate getNasaRestTemplate()
-			throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+	private RestTemplate getNasaRestTemplate() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		TrustStrategy acceptingTrustStrategy = (chain, authType) -> true;
 		SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
 		SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
@@ -136,10 +183,8 @@ public class MiscCodeTest {
 		double coeficienBrightness2 = 0.1297;
 		double coeficientPower = 0.1747;
 
-		double calculationBrightness1 = calculateCuadraticMinimum(brightness1, maxBrightness1, minBrightness1)
-				* coeficienBrightness1;
-		double calculationBrightness2 = calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2)
-				* coeficienBrightness2;
+		double calculationBrightness1 = calculateCuadraticMinimum(brightness1, maxBrightness1, minBrightness1) * coeficienBrightness1;
+		double calculationBrightness2 = calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2) * coeficienBrightness2;
 		double calculationPower = calculateCuadraticMinimum(power, maxPower, minPower) * coeficientPower;
 
 		int result = (int) (calculationBrightness1 + calculationBrightness2 + calculationPower) * 100;
@@ -166,13 +211,12 @@ public class MiscCodeTest {
 		long timeStamp = (new Date().getTime()) / 1000;
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("https://api.darksky.net/forecast/f0882429cb4afe2fb72984e427e6789f/").append(latitude).append(",")
-				.append(longitude).append(",").append(timeStamp)
+		sb.append("https://api.darksky.net/forecast/f0882429cb4afe2fb72984e427e6789f/").append(latitude).append(",").append(longitude)
+				.append(",").append(timeStamp)
 				.append("?units=si&exclude=flags?exclude=alerts?exclude=minutely?exclude=hourly?exclude=daily");
 		URI uriPetition = new URI(sb.toString());
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<WeatherDTO> response = restTemplate.exchange(uriPetition, HttpMethod.GET, null,
-				WeatherDTO.class);
+		ResponseEntity<WeatherDTO> response = restTemplate.exchange(uriPetition, HttpMethod.GET, null, WeatherDTO.class);
 
 		System.out.println(response.getStatusCode() + ":" + response.getBody());
 
@@ -323,6 +367,64 @@ public class MiscCodeTest {
 		}
 
 		return confidence;
+	}
+
+	private static Twitter getTwitterClient() {
+		Twitter twitter = new TwitterFactory().getInstance();
+		twitter.setOAuthConsumer("l3socwjpwuFbis9sDX56PIIxP", "5M8o0Qqj6AWLN2ZBp1LORrCBXziyfUYVgW8WWNky8vwyuDa1gP");
+		twitter.setOAuthAccessToken(
+				new AccessToken("225173447-OfaoIwrdiBx99UZf3r4vrfFZpZbZSxXMSDUYexTi", "U5w21beQoLfSQxb9Zb2fvECFAN8o7jDvRg4FtLABNZFdb"));
+		return twitter;
+	}
+
+	@Test
+	public void fetchTwitter() {
+
+		Twitter twitter = getTwitterClient();
+
+		Query query = new Query();
+		query.setQuery(SpotifireConstants.SPOTIFIRE_TWITTER_HASHTAG);
+		query.setCount(100);
+		List<Status> statuses = null;
+		try {
+			QueryResult queryResult = twitter.search(query);
+			statuses = queryResult.getTweets();
+			statuses.stream().filter(tweet -> Double.compare(tweet.getUser().getId(), 1053697168136122368L) != 0).forEach(tweet -> {
+				Report report = new Report();
+				report.setTwitterId(tweet.getId());
+
+				report.setCreationDate(tweet.getCreatedAt());
+				report.setSource(SourceType.TWITTER);
+				report.setType(ReportType.FIRE);
+				report.setDescription(tweet.getText());
+
+				if (tweet.getGeoLocation() != null) {
+					report.setLocation(new Location(tweet.getGeoLocation().getLatitude(), tweet.getGeoLocation().getLongitude()));
+				}
+
+				if (tweet.getMediaEntities() != null && tweet.getMediaEntities().length > 0
+						&& tweet.getMediaEntities()[0].getType().equals("photo")) {
+
+					try {
+						URL url = new URL(tweet.getMediaEntities()[0].getMediaURL());
+						BufferedImage image = ImageIO.read(url);
+
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						ImageIO.write(image, "jpg", baos);
+						baos.flush();
+						report.setHasImage(true);
+						report.setImage(baos.toByteArray());
+					} catch (IOException e) {
+						LOGGER.error("Error reading tweet image");
+					}
+
+				}
+
+			});
+
+		} catch (Exception e) {
+		}
+
 	}
 
 }
