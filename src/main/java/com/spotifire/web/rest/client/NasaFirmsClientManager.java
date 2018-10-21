@@ -84,9 +84,7 @@ public class NasaFirmsClientManager implements INasaFirmsClientService {
 		double calculationBrightness2 = calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2) * coeficienBrightness2;
 		double calculationPower = calculateCuadraticMinimum(power, maxPower, minPower) * coeficientPower;
 
-		int result = (int) (calculationBrightness1 + calculationBrightness2 + calculationPower) * 100;
-
-		return result;
+		return (int) (calculationBrightness1 + calculationBrightness2 + calculationPower) * 100;
 	}
 
 	private static double calculateCuadraticMinimum(double input, double maximum, double minimum) {

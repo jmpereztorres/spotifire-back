@@ -12,11 +12,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.spotifire.core.service.IReportService;
 import com.spotifire.core.utils.SpotifireUtils;
@@ -56,6 +53,9 @@ public class TwitterClientManager implements ITwitterClientService {
 	@Autowired
 	@Qualifier("nasaRestTemplate")
 	private RestTemplate trustedRestTemplate;
+
+	@Autowired
+	private IGeoLocationClientService geolocationService;
 
 	@Override
 	public void fetchTwitter() {
@@ -117,29 +117,18 @@ public class TwitterClientManager implements ITwitterClientService {
 	public void reportEvidence(Evidence evidence) {
 		Twitter twitter = getTwitterClient();
 
-		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(SpotifireConstants.GEOCODE_API_URL)
-				.queryParam(SpotifireConstants.GEOCODE_API_FORMAT_PARAM, SpotifireConstants.JSON_FORMAT)
-				.queryParam(SpotifireConstants.GEOCODE_API_LATITUDE_PARAM, 39.420143)
-				.queryParam(SpotifireConstants.GEOCODE_API_LONGITUDE_PARAM, -0.457176);
+		GeolocationDTO geolocation = this.geolocationService.locateCoordenates(evidence.getLocation().getLatitude(),
+				evidence.getLocation().getLongitude());
 
-		HttpEntity<GeolocationDTO> response = trustedRestTemplate.exchange(builder.toUriString(), HttpMethod.GET, null,
-				GeolocationDTO.class);
+		String tweet = String.format(SpotifireConstants.TWEET_MESSAGE,
+				geolocation.getAddress().getVillage() != null ? geolocation.getAddress().getVillage() : geolocation.getAddress().getTown(),
 
-		if (response != null) {
-
-			GeolocationDTO geolocation = response.getBody();
-
-			String tweet = String.format(SpotifireConstants.TWEET_MESSAGE,
-					geolocation.getAddress().getVillage() != null ? geolocation.getAddress().getVillage()
-							: geolocation.getAddress().getTown(),
-
-					geolocation.getAddress().getCounty());
-			try {
-				StatusUpdate statusTweet = new StatusUpdate(tweet);
-				twitter.updateStatus(statusTweet);
-			} catch (TwitterException e) {
-				System.err.println(e.getMessage());
-			}
+				geolocation.getAddress().getCounty());
+		try {
+			StatusUpdate statusTweet = new StatusUpdate(tweet);
+			twitter.updateStatus(statusTweet);
+		} catch (TwitterException e) {
+			System.err.println(e.getMessage());
 		}
 
 	}

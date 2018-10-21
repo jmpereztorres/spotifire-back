@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -46,7 +47,7 @@ public class Evidence implements IPojo {
 	private AlertLevel level;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "evidence")
+	@OneToMany(mappedBy = "evidence", fetch = FetchType.EAGER)
 	private List<Report> reports;
 
 	/**
