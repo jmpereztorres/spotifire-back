@@ -2,6 +2,7 @@ package com.spotifire.spotifireback;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -239,7 +240,7 @@ public class MiscCodeTest {
 		File input_file = null;
 
 		try {
-			input_file = new File("C:/Users/Carlos/Desktop/imagenes/no llamas/no_llamas_1.jpg");
+			input_file = new File("C:/Users/Carlos/Desktop/imagenes/llamas/fotoTwitter.jpg");
 			imageInput = ImageIO.read(input_file);
 			System.out.println("Reading complete.");
 		} catch (IOException e) {
@@ -249,19 +250,37 @@ public class MiscCodeTest {
 		int width = imageInput.getWidth();
 		int height = imageInput.getHeight();
 
+		BufferedImage imageOutputRed = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage imageOutputGreen = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage imageOutputBlue = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
 		int histogramReturn[][] = new int[3][256];
 
 		int pixel = 0;
+		int pixelRed = 0;
+		int pixelGreen = 0;
+		int pixelBlue = 0;
 		int red = 0;
 		int green = 0;
 		int blue = 0;
 
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
+				pixelRed = 0;
+				pixelGreen = 0;
+				pixelBlue = 0;
 				pixel = imageInput.getRGB(i, j);
 				red = (pixel >> 16) & 0xFF;
 				green = (pixel >> 8) & 0xFF;
 				blue = pixel & 0xFF;
+
+				pixelRed = (red << 16);
+				pixelGreen = (green << 8);
+				pixelBlue = blue;
+
+				imageOutputRed.setRGB(i, j, pixelRed);
+				imageOutputGreen.setRGB(i, j, pixelGreen);
+				imageOutputBlue.setRGB(i, j, pixelBlue);
 
 				histogramReturn[0][red] += 1;
 				histogramReturn[1][green] += 1;
@@ -269,7 +288,46 @@ public class MiscCodeTest {
 			}
 		}
 
+		try {
+			File outputfileRed = new File("imageTwitterRed.jpg");
+			ImageIO.write(imageOutputRed, "jpg", outputfileRed);
+		} catch (IOException e) {
+
+		}
+
+		try {
+			File outputfileGreen = new File("imageTwitterGreen.jpg");
+			ImageIO.write(imageOutputGreen, "jpg", outputfileGreen);
+		} catch (IOException e) {
+
+		}
+
+		try {
+			File outputfileBlue = new File("imageTwitterBlue.jpg");
+			ImageIO.write(imageOutputBlue, "jpg", outputfileBlue);
+		} catch (IOException e) {
+
+		}
+
 		int confidence = analyzeFire(histogramReturn, width, height);
+
+		System.out.println("Histogram Red.");
+
+		for (int i = 0; i < 256; i++) {
+			System.out.printf("%d : %d \n", i, histogramReturn[0][i]);
+		}
+
+		System.out.println("Histogram Green.");
+
+		for (int i = 0; i < 256; i++) {
+			System.out.printf("%d : %d \n", i, histogramReturn[1][i]);
+		}
+
+		System.out.println("Histogram Blue.");
+
+		for (int i = 0; i < 256; i++) {
+			System.out.printf("%d : %d \n", i, histogramReturn[2][i]);
+		}
 
 		System.out.printf("Confidence of the image being of a fire: %d \n", confidence);
 		System.out.println("Test OK");
@@ -282,9 +340,15 @@ public class MiscCodeTest {
 
 		double numberOfPixels = width * height;
 
+		System.out.printf("Histogram Red mean %d \n", meanHistogramRed);
+		
 		if ((numberOfPixels / 11000) > meanHistogramRed) {
 			meanHistogramRed = 0;
 		}
+		
+		System.out.printf("Histogram Red mean %d \n", meanHistogramRed);
+		System.out.printf("Histogram Green mean %d \n", meanHistogramGreen);
+		System.out.printf("Histogram Blue mean %d \n", meanHistogramBlue);
 
 		int confidence = calculateConfidence(meanHistogramRed, meanHistogramGreen, meanHistogramBlue);
 
@@ -310,7 +374,7 @@ public class MiscCodeTest {
 			float difference = (float) (red - (blue + green)) / (red + blue + green);
 
 			if (difference > 0.1) {
-				if (difference < 1) {
+				if (difference < 0.9) {
 					confidence = (int) (difference * 100);
 				} else {
 					confidence = 99;
