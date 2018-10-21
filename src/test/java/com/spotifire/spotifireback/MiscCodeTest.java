@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.expression.ParseException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -37,6 +35,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.web.client.RestTemplate;
 
 import com.spotifire.config.EmptyConfig;
+import com.spotifire.core.utils.SpotifireUtils;
 import com.spotifire.persistence.constants.ReportType;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
@@ -44,8 +43,7 @@ import com.spotifire.web.rest.dto.WeatherDTO;
 
 /**
  *
- * Para probar código suelto, sin referencias al contexto de Spring y sus
- * service, manager y dao
+ * Para probar código suelto, sin referencias al contexto de Spring y sus service, manager y dao
  *
  * @author aars
  *
@@ -66,13 +64,11 @@ public class MiscCodeTest {
 	}
 
 	@Test
-	public void testSatelliteData()
-			throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+	public void testSatelliteData() throws URISyntaxException, KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		System.out.println("Testing testSatelliteData...");
 		LOGGER.debug("EEEEES");
 		System.out.println("Test Init");
-		URI uriPetition = new URI(
-				"https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/MODIS_C6_Europe_24h.csv");
+		URI uriPetition = new URI("https://firms.modaps.eosdis.nasa.gov/data/active_fire/c6/csv/MODIS_C6_Europe_24h.csv");
 		RestTemplate nasaRestTemplate = this.getNasaRestTemplate();
 		ResponseEntity<String> response = nasaRestTemplate.exchange(uriPetition, HttpMethod.GET, null, String.class);
 
@@ -86,7 +82,7 @@ public class MiscCodeTest {
 				if (columns != null) {
 					report.setCreationDate(parseDateFromCsvFile(columns[5] + columns[6], "yyyy-MM-ddhhmm"));
 					report.setType(ReportType.FIRE);
-					report.setScore(scoringSatelliteData(Double.valueOf(columns[2]), Double.valueOf(columns[10]),
+					report.setScore(this.scoringSatelliteData(Double.valueOf(columns[2]), Double.valueOf(columns[10]),
 							Double.valueOf(columns[11])));
 					report.setLocation(new Location(Double.valueOf(columns[0]), Double.valueOf(columns[1])));
 				}
@@ -110,8 +106,7 @@ public class MiscCodeTest {
 		return res;
 	}
 
-	private RestTemplate getNasaRestTemplate()
-			throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+	private RestTemplate getNasaRestTemplate() throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 		TrustStrategy acceptingTrustStrategy = (chain, authType) -> true;
 		SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
 		SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
@@ -136,11 +131,9 @@ public class MiscCodeTest {
 		double coeficienBrightness2 = 0.1297;
 		double coeficientPower = 0.1747;
 
-		double calculationBrightness1 = calculateCuadraticMinimum(brightness1, maxBrightness1, minBrightness1)
-				* coeficienBrightness1;
-		double calculationBrightness2 = calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2)
-				* coeficienBrightness2;
-		double calculationPower = calculateCuadraticMinimum(power, maxPower, minPower) * coeficientPower;
+		double calculationBrightness1 = this.calculateCuadraticMinimum(brightness1, maxBrightness1, minBrightness1) * coeficienBrightness1;
+		double calculationBrightness2 = this.calculateCuadraticMinimum(brightness2, maxBrightness2, minBrightness2) * coeficienBrightness2;
+		double calculationPower = this.calculateCuadraticMinimum(power, maxPower, minPower) * coeficientPower;
 
 		int result = (int) (calculationBrightness1 + calculationBrightness2 + calculationPower) * 100;
 
@@ -166,13 +159,12 @@ public class MiscCodeTest {
 		long timeStamp = (new Date().getTime()) / 1000;
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("https://api.darksky.net/forecast/f0882429cb4afe2fb72984e427e6789f/").append(latitude).append(",")
-				.append(longitude).append(",").append(timeStamp)
+		sb.append("https://api.darksky.net/forecast/f0882429cb4afe2fb72984e427e6789f/").append(latitude).append(",").append(longitude)
+				.append(",").append(timeStamp)
 				.append("?units=si&exclude=flags?exclude=alerts?exclude=minutely?exclude=hourly?exclude=daily");
 		URI uriPetition = new URI(sb.toString());
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<WeatherDTO> response = restTemplate.exchange(uriPetition, HttpMethod.GET, null,
-				WeatherDTO.class);
+		ResponseEntity<WeatherDTO> response = restTemplate.exchange(uriPetition, HttpMethod.GET, null, WeatherDTO.class);
 
 		System.out.println(response.getStatusCode() + ":" + response.getBody());
 
@@ -269,16 +261,16 @@ public class MiscCodeTest {
 			}
 		}
 
-		int confidence = analyzeFire(histogramReturn, width, height);
+		int confidence = this.analyzeFire(histogramReturn, width, height);
 
 		System.out.printf("Confidence of the image being of a fire: %d \n", confidence);
 		System.out.println("Test OK");
 	}
 
 	private int analyzeFire(int histogram[][], int width, int height) {
-		int meanHistogramRed = calculateHighMeanHistogram(histogram[0], width, height);
-		int meanHistogramGreen = calculateHighMeanHistogram(histogram[1], width, height);
-		int meanHistogramBlue = calculateHighMeanHistogram(histogram[2], width, height);
+		int meanHistogramRed = this.calculateHighMeanHistogram(histogram[0], width, height);
+		int meanHistogramGreen = this.calculateHighMeanHistogram(histogram[1], width, height);
+		int meanHistogramBlue = this.calculateHighMeanHistogram(histogram[2], width, height);
 
 		double numberOfPixels = width * height;
 
@@ -286,7 +278,7 @@ public class MiscCodeTest {
 			meanHistogramRed = 0;
 		}
 
-		int confidence = calculateConfidence(meanHistogramRed, meanHistogramGreen, meanHistogramBlue);
+		int confidence = this.calculateConfidence(meanHistogramRed, meanHistogramGreen, meanHistogramBlue);
 
 		return confidence;
 	}
@@ -323,6 +315,54 @@ public class MiscCodeTest {
 		}
 
 		return confidence;
+	}
+
+	@Test
+	public void testCentralLongitude() {
+
+		Report r1 = new Report();
+		Report r2 = new Report();
+		Report r3 = new Report();
+		Report r4 = new Report();
+		Report r5 = new Report();
+
+		Location l1 = new Location();
+		l1.setLatitude(42.9336785);
+		l1.setLongitude(-72.2272968);
+		r1.setLocation(l1);
+
+		Location l2 = new Location();
+		l2.setLatitude(42.9185950);
+		l2.setLongitude(-72.2249794);
+		r2.setLocation(l2);
+
+		Location l3 = new Location();
+		l3.setLatitude(42.9180293);
+		l3.setLongitude(-72.2531748);
+		r3.setLocation(l3);
+
+		Location l4 = new Location();
+		l4.setLatitude(42.9335843);
+		l4.setLongitude(-72.2560072);
+		r4.setLocation(l4);
+
+		Location l5 = new Location();
+		l5.setLatitude(42.9337728);
+		l5.setLongitude(-72.2284555);
+		r5.setLocation(l5);
+
+		List<Report> reportList = new ArrayList<>();
+		reportList.add(r1);
+		reportList.add(r2);
+		reportList.add(r3);
+		reportList.add(r4);
+		reportList.add(r5);
+
+		Location center = SpotifireUtils.getCentralReportLocation(reportList);
+
+		System.out.println(center.getLatitude());
+		System.out.println(center.getLongitude());
+
 	}
 
 }

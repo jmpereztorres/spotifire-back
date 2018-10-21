@@ -2,11 +2,13 @@ package com.spotifire.core.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.spotifire.persistence.pojo.Location;
+import com.spotifire.persistence.pojo.Report;
 
 public final class SpotifireUtils {
 
@@ -86,5 +88,42 @@ public final class SpotifireUtils {
 
 	public static double distance(Location location1, Location location2) {
 		return distance(location1.getLatitude(), location2.getLatitude(), location1.getLongitude(), location2.getLongitude(), 0d, 0d);
+	}
+
+	public static Location getCentralReportLocation(List<Report> reportList) {
+
+		if (reportList.size() == 1) {
+			return reportList.get(0).getLocation();
+		}
+
+		double x = 0;
+		double y = 0;
+		double z = 0;
+
+		for (Report report : reportList) {
+
+			double latitude = report.getLocation().getLatitude() * Math.PI / 180;
+			double longitude = report.getLocation().getLongitude() * Math.PI / 180;
+
+			x += Math.cos(latitude) * Math.cos(longitude);
+			y += Math.cos(latitude) * Math.sin(longitude);
+			z += Math.sin(latitude);
+		}
+
+		double total = reportList.size();
+
+		x = x / total;
+		y = y / total;
+		z = z / total;
+
+		double centralLongitude = Math.atan2(y, x);
+		double centralSquareRoot = Math.sqrt(x * x + y * y);
+		double centralLatitude = Math.atan2(z, centralSquareRoot);
+
+		Location center = new Location();
+		center.setLatitude(centralLatitude * 180 / Math.PI);
+		center.setLongitude(centralLongitude * 180 / Math.PI);
+
+		return center;
 	}
 }
