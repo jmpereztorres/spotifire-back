@@ -91,7 +91,7 @@ public final class ImageUtils {
 			float difference = (float) (red - (blue + green)) / (red + blue + green);
 
 			if (difference > 0.1) {
-				if (difference < 1) {
+				if (difference < 0.9) {
 					confidence = (int) (difference * 100);
 				} else {
 					confidence = 99;
