@@ -144,7 +144,7 @@ public class CoreTest {
 	@Transactional
 	@Rollback(false)
 	public void fillDatabase() {
-		double range = 1.50d;
+		double range = 1d;
 		double latitudeBase = 39.4532f;
 		double altitudeBase = -0.4262f;
 
@@ -152,8 +152,9 @@ public class CoreTest {
 			Location location = new Location(Math.random() * range + latitudeBase, Math.random() * range + altitudeBase);
 			Evidence evidence = new Evidence();
 			evidence.setCreationDate(new Date());
-			evidence.setConfidence(80 + index % 3);
+			evidence.setConfidence(68 + index % 3);
 			evidence.setImpact(60 + index % 5);
+			evidence.setType(ReportType.FIRE);
 			evidence.setLocation(location);
 
 			this.repo.save(evidence);
