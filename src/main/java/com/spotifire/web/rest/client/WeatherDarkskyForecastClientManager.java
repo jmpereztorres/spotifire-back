@@ -21,7 +21,7 @@ public class WeatherDarkskyForecastClientManager implements IWeatherClientServic
 	private RestTemplate restTemplate;
 
 	@Override
-	public int fechtWeatherData(double latitude, double longitude, long timestamp) throws URISyntaxException {
+	public int fetchWeatherData(double latitude, double longitude, long timestamp) throws URISyntaxException {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append(SpotifireConstants.WEATHER_DARKSKY_FORECAST_BASE_URL).append(latitude).append(SpotifireConstants.OPERATOR_COMMA)

@@ -29,7 +29,9 @@ import com.spotifire.persistence.pojo.Evidence;
 import com.spotifire.persistence.pojo.Location;
 import com.spotifire.persistence.pojo.Report;
 import com.spotifire.persistence.repository.ITransactionalRepository;
+import com.spotifire.web.rest.client.IGeoLocationClientService;
 import com.spotifire.web.rest.dto.FireDTO;
+import com.spotifire.web.rest.dto.GeolocationDTO;
 import com.spotifire.web.rest.dto.ReportRequestDTO;
 
 @Service
@@ -39,6 +41,9 @@ public class ReportManager implements IReportService {
 
 	@Autowired
 	private ITransactionalRepository transactionalRepository;
+
+	@Autowired
+	private IGeoLocationClientService geolocationClientService;
 
 	@Override
 	public Report processReport(Report report) {
@@ -70,8 +75,16 @@ public class ReportManager implements IReportService {
 
 			res = this.saveReport(report);
 
+			if (persisted != null) {
+				this.updateEvidence(persisted.getId());
+			}
+
 		}
 		return res;
+	}
+
+	private void updateEvidence(Long evidenceId) {
+		Evidence evidence = this.transactionalRepository.getObjectById(evidenceId, Evidence.class);
 	}
 
 	private Evidence createEvidence(Report report) {
@@ -79,6 +92,15 @@ public class ReportManager implements IReportService {
 		evidence.setLocation(report.getLocation());
 		evidence.setCreationDate(new Date());
 		evidence.setType(ReportType.FIRE);
+
+		GeolocationDTO geolocation = geolocationClientService.locateCoordenates(report.getLocation().getLatitude(),
+				report.getLocation().getLongitude());
+
+		if (geolocation != null) {
+			evidence.getLocation().setProvince(geolocation.getAddress().getCounty());
+			evidence.getLocation().setCountry(geolocation.getAddress().getCountry());
+		}
+
 		return evidence;
 	}
 
@@ -147,7 +169,7 @@ public class ReportManager implements IReportService {
 
 		fireDTO.setEvidences(evidenceList.stream()
 				.filter(evidence -> SpotifireUtils.distance(evidence.getLocation().getLatitude(), reportRequestDTO.getLatitude(),
-						evidence.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 2000000000)
+						evidence.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 50000000)
 
 				.map(evidence -> fillDistance(reportRequestDTO, evidence)).map(ReportManager::fillAlertType)
 				.sorted((evidence1, evidence2) -> Double.compare(evidence1.getDistance(), evidence2.getDistance()))

@@ -12,7 +12,7 @@ public interface ITransactionalRepository {
 
 	<T> List<T> findByExample(T example);
 
-	<T> T getObjectById(IPojo id, Class<T> clazz);
+	<T> T getObjectById(Long id, Class<T> clazz);
 
 	<T> T save(T object);
 

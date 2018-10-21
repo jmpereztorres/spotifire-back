@@ -119,9 +119,8 @@ public class TransactionalRepository implements ITransactionalRepository {
 	}
 
 	@Override
-	public <T> T getObjectById(IPojo id, Class<T> clazz) {
-		T object = em.find(clazz, id);
-		return object;
+	public <T> T getObjectById(Long id, Class<T> clazz) {
+		return em.find(clazz, id);
 	}
 
 	@Override
