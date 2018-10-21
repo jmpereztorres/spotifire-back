@@ -15,4 +15,6 @@ public interface IReportService {
 	void parseReportAndSave(ReportRequestDTO reportRequest) throws IOException;
 
 	FireDTO findFiresByLocation(ReportRequestDTO reportRequestDTO);
+
+	FireDTO findTypedFiresByLocation(ReportRequestDTO reportRequestDTO);
 }

@@ -3,7 +3,6 @@ package com.spotifire.spotifireback;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,14 +57,6 @@ import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.auth.AccessToken;
-
-/**
- *
- * Para probar código suelto, sin referencias al contexto de Spring y sus service, manager y dao
- *
- * @author aars
- *
- */
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { EmptyConfig.class }, loader = AnnotationConfigContextLoader.class)
@@ -385,11 +376,11 @@ public class MiscCodeTest {
 		double numberOfPixels = width * height;
 
 		System.out.printf("Histogram Red mean %d \n", meanHistogramRed);
-		
+
 		if ((numberOfPixels / 11000) > meanHistogramRed) {
 			meanHistogramRed = 0;
 		}
-		
+
 		System.out.printf("Histogram Red mean %d \n", meanHistogramRed);
 		System.out.printf("Histogram Green mean %d \n", meanHistogramGreen);
 		System.out.printf("Histogram Blue mean %d \n", meanHistogramBlue);

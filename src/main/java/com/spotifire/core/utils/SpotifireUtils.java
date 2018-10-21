@@ -1,7 +1,9 @@
 package com.spotifire.core.utils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -86,5 +88,19 @@ public final class SpotifireUtils {
 
 	public static double distance(Location location1, Location location2) {
 		return distance(location1.getLatitude(), location2.getLatitude(), location1.getLongitude(), location2.getLongitude(), 0d, 0d);
+	}
+
+	public static Date parseDateFromCsvFile(String fieldValue, String pattern) {
+		Date res = null;
+
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+
+		try {
+			res = sdf.parse(fieldValue);
+		} catch (java.text.ParseException e) {
+			System.out.println(e.getMessage());
+		}
+
+		return res;
 	}
 }

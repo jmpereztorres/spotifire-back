@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.spotifire.persistence.constants.AlertLevel;
 import com.spotifire.persistence.constants.ReportType;
 
 @Entity
@@ -40,6 +41,9 @@ public class Evidence implements IPojo {
 
 	@Transient
 	private double distance;
+
+	@Transient
+	private AlertLevel level;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "evidence")
@@ -116,6 +120,14 @@ public class Evidence implements IPojo {
 
 	public void setDistance(double distance) {
 		this.distance = distance;
+	}
+
+	public AlertLevel getLevel() {
+		return level;
+	}
+
+	public void setLevel(AlertLevel level) {
+		this.level = level;
 	}
 
 	@Override

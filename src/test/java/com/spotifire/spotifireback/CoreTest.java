@@ -3,8 +3,6 @@ package com.spotifire.spotifireback;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -60,7 +58,7 @@ public class CoreTest {
 
 	@Autowired
 	private IReportService reportService;
-	
+
 	@Autowired
 	@Qualifier("nasaRestTemplate")
 	private RestTemplate nasaRestTemplate;
@@ -70,8 +68,6 @@ public class CoreTest {
 		System.out.println("OK");
 	}
 
-
-	
 	@Test
 	@Rollback(false)
 	public void fetchTwitter() {
@@ -148,7 +144,7 @@ public class CoreTest {
 	@Transactional
 	@Rollback(false)
 	public void fillDatabase() {
-		double range = 0.000030d;
+		double range = 1.50d;
 		double latitudeBase = 39.4532f;
 		double altitudeBase = -0.4262f;
 

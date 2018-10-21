@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.spotifire.core.utils.ImageUtils;
 import com.spotifire.core.utils.SpotifireUtils;
+import com.spotifire.persistence.constants.AlertLevel;
 import com.spotifire.persistence.constants.ReportType;
 import com.spotifire.persistence.constants.SourceType;
 import com.spotifire.persistence.pojo.Author;
@@ -129,12 +130,28 @@ public class ReportManager implements IReportService {
 
 		Supplier<Stream<Evidence>> supplier = () -> evidenceList.stream()
 				.filter(report -> SpotifireUtils.distance(report.getLocation().getLatitude(), reportRequestDTO.getLatitude(),
-						report.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 20000)
+						report.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 2000000000)
 
 				.map(evidence -> fillDistance(reportRequestDTO, evidence));
 
 		fireDTO.setEvidences(supplier.get().filter(report -> report.getConfidence() >= 70).collect(Collectors.toList()));
 		fireDTO.setAlerts(supplier.get().filter(report -> report.getConfidence() < 70).collect(Collectors.toList()));
+
+		return fireDTO;
+	}
+
+	@Override
+	public FireDTO findTypedFiresByLocation(ReportRequestDTO reportRequestDTO) {
+		FireDTO fireDTO = new FireDTO();
+		List<Evidence> evidenceList = this.transactionalRepository.findByExample(new Evidence());
+
+		fireDTO.setEvidences(evidenceList.stream()
+				.filter(evidence -> SpotifireUtils.distance(evidence.getLocation().getLatitude(), reportRequestDTO.getLatitude(),
+						evidence.getLocation().getLatitude(), reportRequestDTO.getLongitude(), 0d, 0d) < 2000000000)
+
+				.map(evidence -> fillDistance(reportRequestDTO, evidence)).map(ReportManager::fillAlertType)
+				.sorted((evidence1, evidence2) -> Double.compare(evidence1.getDistance(), evidence2.getDistance()))
+				.collect(Collectors.toList()));
 
 		return fireDTO;
 	}
@@ -146,4 +163,9 @@ public class ReportManager implements IReportService {
 		return evidence;
 	}
 
+	private static Evidence fillAlertType(Evidence evidence) {
+		evidence.setLevel(evidence.getConfidence() >= 70 ? AlertLevel.FIRE : AlertLevel.ALERT);
+
+		return evidence;
+	}
 }

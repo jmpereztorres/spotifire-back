@@ -65,4 +65,10 @@ public class FireController {
 		return new ResponseEntity<>(fireDTO, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/typed", method = RequestMethod.POST, produces = { SpotifireConstants.REST_ACCEPT_APPLICATION_JSON_UTF_8 })
+	public ResponseEntity<FireDTO> getFireByLocationTyped(@RequestBody ReportRequestDTO reportRequestDTO) {
+		FireDTO fireDTO = this.reportService.findTypedFiresByLocation(reportRequestDTO);
+		return new ResponseEntity<>(fireDTO, HttpStatus.OK);
+	}
+
 }
