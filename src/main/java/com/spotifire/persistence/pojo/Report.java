@@ -52,8 +52,8 @@ public class Report implements IPojo {
 	private ReportType type;
 
 	private Long twitterId;
-	
-	private int score;
+
+	private Integer score;
 
 	/**
 	 * Default constructor
@@ -152,14 +152,14 @@ public class Report implements IPojo {
 		this.twitterId = twitterId;
 	}
 
-	public int getScore() {
+	public Integer getScore() {
 		return score;
 	}
 
-	public void setScore(int score) {
+	public void setScore(Integer score) {
 		this.score = score;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
