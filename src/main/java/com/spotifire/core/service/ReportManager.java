@@ -160,8 +160,11 @@ public class ReportManager implements IReportService {
 	}
 
 	private static Evidence fillDistance(ReportRequestDTO reportRequestDTO, Evidence evidence) {
-		evidence.setDistance(SpotifireUtils.distance(reportRequestDTO.getLatitude(), evidence.getLocation().getLatitude(),
-				reportRequestDTO.getLongitude(), evidence.getLocation().getLongitude(), 0, 0));
+
+		double distance = SpotifireUtils.distance(reportRequestDTO.getLatitude(), evidence.getLocation().getLatitude(),
+				reportRequestDTO.getLongitude(), evidence.getLocation().getLongitude(), 0, 0);
+
+		evidence.setDistance(Math.round(distance / 1000));
 
 		return evidence;
 	}
